@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>工业设计 · 一学期 16 课</title>
+<meta name="description" content="大学工业设计专业导论课：16 课，从一件真实的实物开始，每一课都落到学生自己动手。可离线播放的课堂互动课件。" />
+<link rel="stylesheet" href="assets/style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0b0c'/><circle cx='50' cy='42' r='26' fill='none' stroke='%23ff5a1f' stroke-width='9'/><path d='M26 78h48' stroke='%23f4f1ea' stroke-width='9' stroke-linecap='round'/></svg>" />
+</head>
+<body class="course-home">
+
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><span id="bar"></span></div>
+
+<header class="topbar" id="topbar">
+  <a class="brand" href="index.html">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span class="brand-text">工业设计<em>·</em>课程地图</span>
+  </a>
+  <div class="topbar-right">
+    <button class="key-hint" id="helpBtn" type="button" aria-haspopup="dialog">快捷键 <kbd>?</kbd></button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ═══ 封面 ═══ -->
+  <section class="sec hero hero--plain course-hero" data-title="课程">
+    <div class="wrap">
+      <p class="kicker reveal">大学工业设计 · 专业导论</p>
+      <h1 class="hero-title">
+        <span class="line reveal" data-d="1">十六次点火，</span>
+        <span class="line reveal" data-d="2">不是十六篇讲义。</span>
+      </h1>
+      <p class="hero-sub reveal" data-d="3">
+        每一课都从一件<em>真实的实物</em>开始 —— 一支可乐瓶、一把椅子、一个注塑模具 ——
+        最后一定落到你自己动手。你能看见它、拖动它、拆开它、画它。
+        <br><br>
+        全部离线可用。把它拷进 U 盘，插到任何一台教室电脑上都能放。
+      </p>
+      <div class="hero-cta reveal" data-d="4">
+        <a class="btn btn--primary" href="lessons/01-what-is-id.html">从第 1 课开始 →</a>
+        <a class="btn btn--ghost" href="#map">看完整课程地图</a>
+      </div>
+      <div class="hero-meta reveal" data-d="5">
+        <span><b>16</b> 课</span><span class="sep"></span>
+        <span><b>21</b> 件实物照片</span><span class="sep"></span>
+        <span><b>51</b> 处课堂互动</span><span class="sep"></span>
+        <span><b>80</b> 道随堂题</span><span class="sep"></span>
+        <span>零依赖 · 断网可用</span>
+      </div>
+    </div>
+    <div class="course-strip" id="courseStrip" aria-hidden="true"></div>
+  </section>
+
+  <!-- ═══ 课程地图 ═══ -->
+  <section class="sec" id="map" data-title="课程地图">
+    <div class="wrap">
+      <p class="kicker">课程地图</p>
+      <h2 class="sec-title">一学期，十六个问题。</h2>
+      <p class="lead narrow">
+        从"设计是什么"走到"你学会了问什么问题"。点任意一课开始。
+      </p>
+      <div class="course-map" id="courseMap"></div>
+    </div>
+  </section>
+
+  <!-- ═══ 怎么用 ═══ -->
+  <section class="sec sec--alt" data-title="怎么用">
+    <div class="wrap">
+      <p class="kicker">怎么用</p>
+      <h2 class="sec-title">给老师的三句话。</h2>
+      <div class="card-grid">
+        <article class="kw reveal">
+          <div class="kw-num">01</div>
+          <h3>每课 45 分钟 <span>节奏</span></h3>
+          <p>每课都是同样的骨架：先看见实物 → 再讲清一个概念 → 最后 5 分钟学生自己动手。时间不够时，砍掉中间，保住最后一步。</p>
+        </article>
+        <article class="kw reveal" data-d="1">
+          <div class="kw-num">02</div>
+          <h3>快捷键 <span>投影</span></h3>
+          <p><kbd>→</kbd> 翻节，<kbd>N</kbd> / <kbd>P</kbd> 翻课，<kbd>T</kbd> 开计时，<kbd>R</kbd> 随机抽一件实物。<kbd>F11</kbd> 全屏。不用找鼠标。</p>
+        </article>
+        <article class="kw reveal" data-d="2">
+          <div class="kw-num">03</div>
+          <h3>内容随便改 <span>备课</span></h3>
+          <p>每课的全部文字都在 <code>assets/data/</code> 里一个文件里。改文案不用碰任何其它文件，改完刷新即可。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<section class="credits" aria-labelledby="creditsTitle">
+  <div class="wrap">
+    <h3 id="creditsTitle">图片来源与许可</h3>
+    <p>本课程所有物件照片均来自 Wikimedia Commons，按其原始许可协议使用，并在此署名。
+       这些图片可以自由传播，但请保留作者与协议 —— 这也是设计师的职业习惯：<b>用别人的东西，要打个招呼。</b></p>
+    <details><summary>展开查看全部署名</summary><div class="credit-grid" id="creditGrid"></div></details>
+  </div>
+</section>
+
+<footer class="site-foot">
+  <div class="wrap foot-inner">
+    <p>工业设计 · 一学期 16 课 &nbsp;|&nbsp; 为课堂而生，可离线播放</p>
+    <p class="foot-tip">按 <kbd>?</kbd> 查看快捷键</p>
+  </div>
+</footer>
+
+<div class="modal" id="helpModal" role="dialog" aria-modal="true" hidden>
+  <div class="modal-card">
+    <h3>课堂快捷键</h3>
+    <ul class="keys">
+      <li><kbd>→</kbd><kbd>空格</kbd><kbd>PgDn</kbd><span>下一节</span></li>
+      <li><kbd>←</kbd><kbd>PgUp</kbd><span>上一节</span></li>
+      <li><kbd>1</kbd>–<kbd>9</kbd><span>跳到第 N 节</span></li>
+      <li><kbd>N</kbd> / <kbd>P</kbd><span>下一课 / 上一课</span></li>
+      <li><kbd>T</kbd><span>开始 / 暂停计时</span></li>
+      <li><kbd>R</kbd><span>随机看一件经典物件</span></li>
+      <li><kbd>?</kbd><span>打开 / 关闭本面板</span></li>
+    </ul>
+    <button class="btn btn--primary" type="button" id="helpClose">知道了</button>
+  </div>
+</div>
+
+<script src="assets/imgmeta.js"></script>
+<script src="assets/credits.js"></script>
+<script src="assets/course.js"></script>
+<script src="assets/objects.js"></script>
+<script src="assets/course-home.js"></script>
+</body>
+</html>
