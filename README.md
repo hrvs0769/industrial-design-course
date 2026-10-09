@@ -4,13 +4,13 @@
 
 ### 👉 在线打开：<https://hrvs0769.github.io/industrial-design-course/>
 
-![课程首页](.github/preview.png)
+![课程首页](.github/preview.webp)
 
 ---
 
 ## 这套课件长什么样
 
-![课程地图](.github/map.png)
+![课程地图](.github/map.webp)
 
 **16 课，51 处课堂互动，80 道随堂题，21 件真实实物照片。**
 
