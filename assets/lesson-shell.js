@@ -25,7 +25,26 @@
   document.documentElement.style.setProperty('--accent', lesson.accent || '#FF5A1F');
 
   /* ── 渲染正文 ────────────────────────────────────────── */
-  app.innerHTML = window.renderLesson(data).join('');
+  // 公网环境下偶发：数据脚本没拉下来。绝不留白屏，给一句能操作的提示。
+  const loaded = !!(window.LESSON && (window.LESSON.blocks || []).length && window.renderLesson);
+  app.innerHTML = loaded ? window.renderLesson(data).join('') : `
+    <section class="sec" data-title="加载中断">
+      <div class="wrap" style="text-align:center;padding:clamp(60px,18vh,180px) 0">
+        <p class="kicker">连接中断</p>
+        <h2 class="sec-title" style="margin:0 auto 26px">这一课的内容没加载出来。</h2>
+        <p class="lead" style="max-width:46ch;margin:0 auto 14px">
+          多半是网络抖了一下 —— 刷新一次通常就好了。
+        </p>
+        <p class="muted" style="max-width:52ch;margin:0 auto 34px;font-size:14px">
+          如果反复出现，检查能不能打开 <code>assets/data/${esc(id)}.js</code>。
+          在教室里更稳妥的办法是把整个文件夹拷进 U 盘，双击 <code>index.html</code> 离线播放。
+        </p>
+        <p style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn--primary" type="button" onclick="location.reload()">重新加载</button>
+          <a class="btn btn--ghost" href="${B}index.html">返回课程地图</a>
+        </p>
+      </div>
+    </section>`;
 
   /* ── 顶栏 ────────────────────────────────────────────── */
   const topbar = $('#topbar');
