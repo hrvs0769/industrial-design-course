@@ -205,8 +205,9 @@
 
     $('#drawBriefBtn').addEventListener('click', () => {
       const u = pick(b.users || []), t = pick(b.things || []), g = pick(b.goals || []);
-      box.textContent = b.template
-        ? b.template.replace('{谁}', u).replace('{什么}', t).replace('{目标}', g)
+      // 用 innerHTML：模板是老师写的，允许 <br> 换行（内容与 render.js 同级信任）
+      box.innerHTML = b.template
+        ? b.template.replace(/\{谁\}/g, u).replace(/\{什么\}/g, t).replace(/\{目标\}/g, g)
         : `为【${u}】设计一个【${t}】，${g}。`;
       list.innerHTML = '';
       box.animate([{ opacity: .2, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }],
@@ -419,9 +420,19 @@
     nums.forEach(n => obs.observe(n));
   };
 
+  /* ── 看图识物 ────────────────────────────────────────── */
+  window.LABS.detailQuiz = function () {
+    const wrap = $('.dq-grid');
+    if (!wrap) return;
+    wrap.addEventListener('click', e => {
+      const c = e.target.closest('.dq');
+      if (c) c.classList.toggle('is-open');
+    });
+  };
+
   /* ── 初始化全部 ──────────────────────────────────────── */
   window.LABS.init = function () {
-    ['vitrine', 'spectrum', 'timeline', 'gallery', 'objectModal', 'steps', 'lab', 'quiz', 'stats']
+    ['vitrine', 'spectrum', 'timeline', 'gallery', 'objectModal', 'steps', 'detailQuiz', 'lab', 'quiz', 'stats']
       .forEach(k => { try { window.LABS[k](); } catch (err) { console.warn('lab failed:', k, err); } });
   };
 })();

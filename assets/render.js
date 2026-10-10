@@ -339,10 +339,58 @@
     </div>
   </section>`;
 
-  /* ── 组装 ───────────────────────────────────────────── */
+  // 看图识物：投影细节，全班猜，点开揭晓
+  B.detailQuiz = b => `<section class="sec${b.alt ? ' sec--alt' : ''}" data-title="${esc(b.nav || '看图识物')}">
+    <div class="wrap">
+      ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
+      <h2 class="sec-title reveal">${R(b.title)}</h2>
+      ${b.lead ? `<p class="lead narrow reveal">${R(b.lead)}</p>` : ''}
+      <div class="dq-grid">
+        ${(b.items || []).map((it, i) => `
+          <button class="dq reveal" data-d="${i % 3}" type="button" aria-label="第 ${i + 1} 张细节图，点击揭晓">
+            <span class="dq-frame" style="--ar:${(META[it.img] && META[it.img].ar) || 1.3}">
+              <img src="${IMG(it.img, 'card')}" alt="细节图 ${i + 1}" loading="lazy" decoding="async" style="object-position:${it.pos || '50% 50%'}">
+              <span class="dq-num">${String(i + 1).padStart(2, '0')}</span>
+              <span class="dq-veil"></span>
+            </span>
+            <span class="dq-body">
+              <span class="dq-q">${esc(b.q || '这是什么的一部分？')}<i>点击揭晓</i></span>
+              <b class="dq-a">${esc(it.ans || '')}</b>
+              ${it.hint ? `<span class="dq-hint">${R(it.hint)}</span>` : ''}
+            </span>
+          </button>`).join('')}
+      </div>
+      ${b.note ? `<div class="takeaway reveal">${R(b.note)}</div>` : ''}
+    </div>
+  </section>`;
+
+  // 技术图解（矢量 SVG，来自 assets/diagrams.js）
+  B.diagram = b => `<section class="sec${b.alt ? ' sec--alt' : ''}" data-title="${esc(b.nav || '图解')}">
+    <div class="wrap">
+      ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
+      ${b.title ? `<h2 class="sec-title reveal">${R(b.title)}</h2>` : ''}
+      ${b.lead ? `<p class="lead narrow reveal">${R(b.lead)}</p>` : ''}
+      <div class="dg-list">
+        ${(b.items || []).map(it => `
+          <figure class="dg reveal">
+            <div class="dg-frame">${(window.DIAGRAMS || {})[it.d] || ''}</div>
+            ${it.cap ? `<figcaption>${R(it.cap)}</figcaption>` : ''}
+          </figure>`).join('')}
+      </div>
+      ${b.note ? `<div class="takeaway reveal">${R(b.note)}</div>` : ''}
+    </div>
+  </section>`;
+
+  // ── 组装 ─────────────────────────────────────────────
   window.renderLesson = function (lesson) {
     const blocks = (lesson && lesson.blocks) || [];
-    return blocks.map(b => (B[b.type] ? B[b.type](b) : '')).filter(Boolean);
+    const unknown = [];
+    const html = blocks.map(b => {
+      if (!B[b.type]) { unknown.push(b.type); return ''; }
+      return B[b.type](b);
+    }).filter(Boolean);
+    if (unknown.length) console.warn('[render] 未知区块类型:', unknown.join(', '));
+    return html;
   };
   window.BLOCKS = B;
 })();

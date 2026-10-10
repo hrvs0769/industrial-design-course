@@ -77,17 +77,29 @@
     return b;
   });
   const wall = $('.wall');
-  let activeIdx = -1, ticking = false;
+  let activeIdx = -1, ticking = false, trailing = false;
   const bar = $('#bar');
 
   function goTo(i) {
     i = Math.max(0, Math.min(SECS.length - 1, i));
     SECS[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+  // 兜底：IntersectionObserver 在快速滚动时会漏掉「刚进入又离开」的瞬时状态，
+  // 那会让区块永远停在 opacity:0。这里在每次滚动时把凡是已经进入过视口的补上。
+  function sweepReveals() {
+    const vh = window.innerHeight;
+    const left = $$('.reveal:not(.is-in), .kw:not(.is-in)');
+    if (!left.length) return;
+    left.forEach(el => {
+      if (el.getBoundingClientRect().top < vh - 40) el.classList.add('is-in');
+    });
+  }
   function onScroll() {
-    if (ticking) return;
+    if (ticking) { trailing = true; return; }
     ticking = true;
     requestAnimationFrame(() => {
+      ticking = false;
+      sweepReveals();
       const max = document.documentElement.scrollHeight - window.innerHeight;
       if (bar) bar.style.width = (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0) + '%';
       const mid = window.scrollY + window.innerHeight * 0.36;
@@ -101,7 +113,8 @@
         const r = wall.getBoundingClientRect();
         topbar.classList.toggle('is-light', r.top <= 10 && r.bottom >= 40);
       }
-      ticking = false;
+      // 快速滚动时最后几次事件会被合并丢掉，补跑一次保证收尾状态正确
+      if (trailing) { trailing = false; onScroll(); }
     });
   }
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -123,10 +136,6 @@
     kw.style.setProperty('--mx', (e.clientX - r.left) + 'px');
     kw.style.setProperty('--my', (e.clientY - r.top) + 'px');
   }, { passive: true });
-
-  /* ── 互动 ────────────────────────────────────────────── */
-  window.LABS.init();
-  $$('.reveal, .kw').forEach(el => { if (!el.classList.contains('is-in')) io.observe(el); });
 
   /* ── 弹窗（全站共用，外壳生成） ──────────────────────── */
   const shell = $('#shell');
@@ -240,6 +249,10 @@
         if (/^[1-9]$/.test(e.key)) { e.preventDefault(); goTo(+e.key); }
     }
   });
+
+  /* ── 互动（必须放在弹窗生成之后：objectModal 依赖 #objModal 才能绑定）── */
+  window.LABS.init();
+  $$('.reveal, .kw').forEach(el => { if (!el.classList.contains('is-in')) io.observe(el); });
 
   onScroll();
   window.addEventListener('load', onScroll);

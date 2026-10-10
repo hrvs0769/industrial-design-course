@@ -17,7 +17,7 @@ window.LESSON = {
     ],
     sub:'你已经在上面坐了十几年。可如果现在把椅子拿走，让你默画它的靠背、扶手、和地板接触的那只脚 —— 你多半画不出来。这不是记性问题，是"看"从来没有真正发生过。',
     cta:[ {text:'开始这堂课', href:'#s1'}, {text:'随机看一件改变世界的物件', act:'random'} ],
-    meta:['<b>5</b> 张放大细节','<b>6</b> 个观察练习','一支笔 · 一张纸就能上'],
+    meta:['<b>13</b> 张细节图','<b>6</b> 个观察练习','一支笔 · 一张纸就能上'],
     vitrine:['panton','coke','swatch','walkman']
   },
 
@@ -38,6 +38,26 @@ window.LESSON = {
       { n:'03', h:'观察', en:'Observe', p:'带着目标看，看完能一条一条说出来。有方法，可以训练，会累。', v:78 },
       { n:'04', h:'洞察', en:'Insight', p:'从一个别人没提过的细节里，推出一个别人没说出口的需要。这是设计真正开始的地方。', v:100 }
     ] },
+
+  { type:'detailQuiz', nav:'看图识物', alt:true, kicker:'02 / 先做个游戏 · 全班一起',
+    title:'十三张照片，每一张<br>都是你见过的东西的一部分。',
+    lead:'我一张一张放，你们喊出它是什么。喊不出来很正常 —— 这说明你「看过」它，但从来没有「看见」它。',
+    items:[
+      { img:'d-coke-glass', ans:'0.4', hint:'可口可乐瓶 · 玻璃肩部' },
+      { img:'d-coke-logo', ans:'0.76', hint:'可口可乐瓶 · 手写体商标' },
+      { img:'d-panton-rib', ans:'0.58', hint:'潘顿椅 · 椅面棱线' },
+      { img:'d-swatch-face', ans:'0.6', hint:'Swatch · 表盘字体' },
+      { img:'d-braun-grill', ans:'博朗 SK4 · 扬声器格栅', hint:'这些横缝的间距是算出来的' },
+      { img:'d-juicer-fin', ans:'0.48', hint:'Alessi 榨汁机 · 抛光铝鳍' },
+      { img:'d-mold-steel', ans:'0.82', hint:'榨汁机注塑模具 · 加工面' },
+      { img:'d-walkman-btn', ans:'索尼 Walkman · 侧边按键排', hint:'没有屏幕，全靠形状记功能' },
+      { img:'d-imac-plast', ans:'0.78', hint:'iMac G3 · 半透明外壳' },
+      { img:'d-billy-wood', ans:'宜家 Billy 书架 · 侧板与层板端面', hint:'刨花板贴面，不是实木 —— 便宜是有理由的' },
+      { img:'d-kelp-mat', ans:'0.72', hint:'Kelp Chair · 生物基材料' },
+      { img:'d-iphone-btn', ans:'0.99', hint:'初代 iPhone · 实体 Home 键' },
+      { img:'d-carlton', ans:'0.78', hint:'Carlton 书架 · 1981 孟菲斯' }
+    ],
+    note:'<b>课堂用法：</b>先只放图，别揭晓。等三四个同学猜完再点开。<b>猜错的那几张，恰恰是这一课要讲的东西。</b>' },
 
   { type:'figures', nav:'放大细节', kicker:'02 / 五张照片，五个你多半没注意过的地方',
     title:'把镜头推近，<br>设计就藏在这几毫米里。',
