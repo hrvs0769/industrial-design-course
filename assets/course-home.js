@@ -34,7 +34,6 @@
         <span class="lesson-frame">
           <img src="${IMG(img, 'card')}" alt="" loading="lazy" decoding="async" style="object-position:${o.pos || '50% 50%'}">
           <span class="lesson-week">W${String(l.week).padStart(2, '0')}</span>
-          ${l.done ? '<span class="lesson-done">已完成</span>' : ''}
         </span>
         <span class="lesson-body">
           <span class="lesson-tag">${esc(l.tag || '')}</span>

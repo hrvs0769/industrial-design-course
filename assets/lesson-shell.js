@@ -25,19 +25,15 @@
   document.documentElement.style.setProperty('--accent', lesson.accent || '#FF5A1F');
 
   /* ── 渲染正文 ────────────────────────────────────────── */
-  // 公网环境下偶发：数据脚本没拉下来。绝不留白屏，给一句能操作的提示。
+  // 偶发：数据没拉下来。绝不留白屏，给一句能操作的提示。
   const loaded = !!(window.LESSON && (window.LESSON.blocks || []).length && window.renderLesson);
   app.innerHTML = loaded ? window.renderLesson(data).join('') : `
     <section class="sec" data-title="加载中断">
       <div class="wrap" style="text-align:center;padding:clamp(60px,18vh,180px) 0">
-        <p class="kicker">连接中断</p>
-        <h2 class="sec-title" style="margin:0 auto 26px">这一课的内容没加载出来。</h2>
-        <p class="lead" style="max-width:46ch;margin:0 auto 14px">
-          多半是网络抖了一下 —— 刷新一次通常就好了。
-        </p>
-        <p class="muted" style="max-width:52ch;margin:0 auto 34px;font-size:14px">
-          如果反复出现，检查能不能打开 <code>assets/data/${esc(id)}.js</code>。
-          在教室里更稳妥的办法是把整个文件夹拷进 U 盘，双击 <code>index.html</code> 离线播放。
+        <p class="kicker">加载中断</p>
+        <h2 class="sec-title" style="margin:0 auto 26px">这一课的内容没能加载出来。</h2>
+        <p class="lead" style="max-width:46ch;margin:0 auto 34px">
+          多半是网络抖动导致的。刷新一次通常就好了。
         </p>
         <p style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <button class="btn btn--primary" type="button" onclick="location.reload()">重新加载</button>
@@ -144,15 +140,15 @@
     <section class="credits" aria-labelledby="creditsTitle">
       <div class="wrap">
         <h3 id="creditsTitle">图片来源与许可</h3>
-        <p>本页所有物件照片均来自 Wikimedia Commons，按其原始许可协议使用，并在此署名。
-           这些图片可以自由传播，但请保留作者与协议 —— 这也是设计师的职业习惯：<b>用别人的东西，要打个招呼。</b></p>
+        <p>本课程使用的实物照片来自 <b>Wikimedia Commons</b>，依据其原始许可协议（Public domain / CC0 / CC BY / CC BY-SA）使用。
+           以下列出每张图片的作者、协议与来源 —— <b>用别人的东西要署名，这是设计行业最基本的习惯。</b></p>
         <details><summary>展开查看全部署名</summary><div class="credit-grid" id="creditGrid"></div></details>
       </div>
     </section>
     <footer class="site-foot">
       <div class="wrap foot-inner">
-        <p>${esc(COURSE.title || '工业设计')} · 第 ${esc(lesson.id)} 课 &nbsp;|&nbsp; 可离线播放</p>
-        <p class="foot-tip"><a href="${B}index.html">← 返回课程地图</a> · 按 <kbd>?</kbd> 查看快捷键 · <kbd>→</kbd> 下一节</p>
+        <p>${esc(COURSE.title || '工业设计')} · 第 ${esc(lesson.id)} 课</p>
+        <p class="foot-tip"><a href="${B}index.html">← 返回课程地图</a> · <kbd>→</kbd> 下一节</p>
       </div>
     </footer>
     <div class="modal" id="helpModal" role="dialog" aria-modal="true" hidden>

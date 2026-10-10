@@ -7,7 +7,7 @@ window.COURSE = {
   intro: '这不是十六篇讲义，是十六次点火。每一课都从一件真实的实物开始，最后一定落到你自己动手。',
   lessons: [
     { id:'01', file:'01-what-is-id.html',      week:1,  short:'设计是什么',       title:'你身边的一切，<br>都是被人想出来的',       cover:'panton',  accent:'#FF5A1F',
-      q:'设计到底是干什么的？', tag:'导论', done:true },
+      q:'设计到底是干什么的？', tag:'导论' },
     { id:'02', file:'02-observation.html',     week:2,  short:'观察力',           title:'你真的"看见"过<br>一把椅子吗',              cover:'panton',  accent:'#6EE7D7',
       q:'看，是一种可以训练的能力吗？', tag:'方法' },
     { id:'03', file:'03-history.html',         week:3,  short:'设计史',           title:'工业设计不是天生的，<br>是被危机逼出来的',   cover:'tl-1919', accent:'#A78BFA',
