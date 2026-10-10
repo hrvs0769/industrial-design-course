@@ -1,0 +1,428 @@
+/* ═══════════════════════════════════════════════════════════
+   APPLE-UI —— 顶级排版尺度 / 纵深 / 运动
+   这一层在 style.css 之后加载，只做「升级」，不推翻原有配色。
+   苹果官网的四个可迁移特征：
+     ① 排版尺度极大、字距极紧、行高极紧
+     ② 圆角大、阴影深、层次分明
+     ③ 运动统一走同一条缓动曲线，绝不 linear
+     ④ 滚动位置直接映射成动画，而不是"进入就播一次"
+   ═══════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── 流体排版尺度 ── */
+  --t-display: clamp(40px, 6.8vw, 108px);
+  --t-h1:      clamp(30px, 4.4vw, 64px);
+  --t-h2:      clamp(24px, 3.1vw, 44px);
+  --t-h3:      clamp(19px, 1.9vw, 27px);
+  --t-lead:    clamp(16.5px, 1.35vw, 21px);
+  --t-body:    clamp(15px, .4vw + 14px, 17px);
+  --t-small:   clamp(12.5px, .3vw + 11.5px, 14px);
+
+  --track-tight: -.028em;
+  --track-tighter: -.04em;
+
+  /* ── 圆角 ── */
+  --r-xs:8px; --r-sm:12px; --r-md:18px; --r-lg:24px; --r-xl:32px; --r-2xl:44px;
+
+  /* ── 纵深 ── */
+  --sh-1: 0 1px 2px rgba(0,0,0,.35);
+  --sh-2: 0 10px 30px -12px rgba(0,0,0,.62);
+  --sh-3: 0 34px 80px -34px rgba(0,0,0,.88);
+  --sh-hot: 0 26px 60px -26px rgba(255,90,31,.55);
+
+  /* ── 苹果的缓动 ── */
+  --e-apple: cubic-bezier(.32,.72,0,1);
+  --e-soft:  cubic-bezier(.16,1,.3,1);
+
+  /* ── 玻璃 ── */
+  --glass: rgba(16,16,18,.62);
+}
+
+/* ═══ 排版：全局收紧 ═══════════════════════════════ */
+body{ font-size:var(--t-body); letter-spacing:-.005em; }
+
+h1,h2,h3,h4{ letter-spacing:var(--track-tight); line-height:1.08; font-weight:640; margin:0; }
+
+.hero-title{
+  font-size:var(--t-display) !important;
+  line-height:.98 !important;
+  letter-spacing:var(--track-tighter) !important;
+  font-weight:700 !important;
+  margin-bottom:.42em;
+}
+.sec-title{
+  font-size:var(--t-h2) !important;
+  line-height:1.1 !important;
+  letter-spacing:var(--track-tight) !important;
+  font-weight:660 !important;
+}
+.lead{ font-size:var(--t-lead) !important; line-height:1.62 !important; letter-spacing:-.008em; }
+.kicker{
+  font-size:clamp(11px,.8vw,13px) !important;
+  letter-spacing:.2em !important;
+  text-transform:uppercase;
+  font-weight:640;
+}
+
+/* 主标题的渐变高光（苹果常用的做法） */
+.hero-title .line{ display:block; }
+.hero-title em, .sec-title em{
+  font-style:normal;
+  background:linear-gradient(96deg,#FF7A3D 0%,#FF5A1F 42%,#FFB694 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+
+/* ═══ 顶栏：玻璃化 + 滚动后收窄 ═══════════════════ */
+.topbar{
+  backdrop-filter:blur(22px) saturate(180%);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);
+  transition:height .5s var(--e-apple), background .5s var(--e-apple), border-color .5s;
+}
+.topbar.is-stuck{
+  background:rgba(10,10,11,.78);
+  border-bottom-color:rgba(244,241,234,.09);
+}
+.topbar.is-stuck .brand-text{ opacity:.92; }
+
+/* 顶部滚动进度条 */
+.progress span{
+  transform-origin:0 50%;
+  background:linear-gradient(90deg,var(--hot),var(--amber,#F5B841));
+  box-shadow:0 0 14px rgba(255,90,31,.6);
+}
+
+/* ═══ 卡片：加深纵深 + 悬停抬升 ════════════════════ */
+.lesson-card,.kw,.case-card,.stat,.fig,.obj-card,.tl-node{
+  transition:transform .55s var(--e-apple), box-shadow .55s var(--e-apple),
+             border-color .4s, background .4s;
+}
+.lesson-card:hover,.kw:hover,.case-card:hover,.fig:hover{
+  transform:translateY(-6px);
+  box-shadow:var(--sh-3);
+  border-color:rgba(244,241,234,.26);
+}
+.lesson-card,.case-card{
+  border-radius:var(--r-lg) !important;
+  overflow:hidden;
+  box-shadow:var(--sh-2);
+}
+.lesson-card img,.case-frame img{ transition:transform .9s var(--e-apple), filter .6s; }
+.lesson-card:hover img{ transform:scale(1.05); }
+
+/* 光标跟随的柔光（苹果产品卡的质感） */
+.has-glow{ position:relative; isolation:isolate; }
+.has-glow::after{
+  content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(320px circle at var(--mx,50%) var(--my,50%),
+             rgba(255,90,31,.16), transparent 62%);
+  opacity:0; transition:opacity .5s var(--e-apple); z-index:2;
+}
+.has-glow:hover::after{ opacity:1; }
+
+/* ═══ 按钮：磁吸 + 高光扫过 ═══════════════════════ */
+.btn{
+  border-radius:999px;
+  font-weight:620;
+  letter-spacing:-.01em;
+  transition:transform .45s var(--e-apple), box-shadow .45s var(--e-apple),
+             background .35s, color .35s, border-color .35s;
+  will-change:transform;
+}
+.btn--primary{
+  box-shadow:var(--sh-hot);
+  background:linear-gradient(180deg,#FF6B33,#FF5A1F);
+}
+.btn--primary:hover{ box-shadow:0 30px 70px -24px rgba(255,90,31,.78); }
+.btn--primary::after{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.34) 48%,transparent 66%);
+  transform:translateX(-120%); transition:transform .85s var(--e-apple);
+}
+.btn--primary{ position:relative; overflow:hidden; }
+.btn--primary:hover::after{ transform:translateX(120%); }
+
+/* ═══ 揭示动画：更苹果的味道 ═══════════════════════ */
+.reveal{
+  opacity:0; transform:translateY(26px) scale(.985);
+  transition:opacity .9s var(--e-soft), transform 1.05s var(--e-soft);
+}
+.reveal.is-in{ opacity:1; transform:none; }
+@media (prefers-reduced-motion: reduce){
+  .reveal{ opacity:1 !important; transform:none !important; }
+}
+
+/* ═══════════════════════════════════════════════════
+   可玩性组件（前缀 sim- ，避免与课程里的 .lab 动手环节冲突）
+   ═══════════════════════════════════════════════════ */
+.sim{
+  border-radius:var(--r-xl);
+  border:1px solid rgba(244,241,234,.14);
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));
+  box-shadow:var(--sh-3);
+  padding:clamp(20px,2.6vw,40px);
+  margin:0 0 12px;
+}
+.sim-head{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:8px; }
+.sim-head h3{ font-size:var(--t-h3); }
+.sim-tag{
+  font-family:var(--mono); font-size:11px; letter-spacing:.16em;
+  padding:4px 10px; border-radius:999px;
+  background:rgba(255,90,31,.14); border:1px solid rgba(255,90,31,.34); color:#FFB694;
+}
+.sim-sub{ color:var(--muted); font-size:var(--t-small); margin:0 0 24px; line-height:1.7; }
+.sim-grid{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:clamp(18px,2.4vw,38px); align-items:start; }
+@media (max-width:900px){ .sim-grid{ grid-template-columns:minmax(0,1fr); } }
+
+/* 舞台 */
+.sim-stage{
+  position:relative; border-radius:var(--r-lg); overflow:hidden;
+  background:radial-gradient(70% 70% at 50% 38%,rgba(111,180,255,.11),transparent 70%), #0C0C0E;
+  border:1px solid rgba(111,180,255,.16);
+  transition:border-color .6s var(--e-apple), box-shadow .6s var(--e-apple);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+  aspect-ratio:1.34;                     /* 稳定的画框比例，左右两栏高度才对得上 */
+  display:grid; place-items:center;
+  padding:34px 20px 18px;
+}
+.sim-stage > div{ width:100%; height:100%; min-height:0; display:grid; place-items:center; }
+.sim-stage svg{ width:100%; height:100%; display:block; }
+.sim-stage.is-run{ animation:stageShake .42s var(--e-apple); }
+@keyframes stageShake{
+  0%,100%{ transform:translateY(0) } 30%{ transform:translateY(-3px) } 60%{ transform:translateY(2px) }
+}
+.stage-label{
+  position:absolute; left:16px; top:14px; font-family:var(--mono);
+  font-size:11px; letter-spacing:.18em; color:rgba(111,180,255,.7); z-index:2;
+}
+.stage-state{
+  position:absolute; right:16px; top:14px; font-family:var(--mono);
+  font-size:11.5px; letter-spacing:.16em; color:#FFB694; z-index:2;
+}
+.stage-state.is-run{ animation:blink .42s steps(2) infinite; }
+@keyframes blink{ 50%{ opacity:.35 } }
+
+/* 参数控件 */
+.sim-ctl{ margin-bottom:22px; }
+.sim-ctl-top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+.sim-ctl-top label{ font-size:var(--t-small); color:var(--muted); letter-spacing:.02em; }
+.sim-ctl-top b{
+  font-family:var(--mono); font-size:15.5px; color:var(--paper); font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+.sim-range{ position:relative; height:24px; }
+.sim-range input[type=range]{
+  position:absolute; inset:0; width:100%; height:24px; margin:0;
+  -webkit-appearance:none; appearance:none; background:transparent;
+}
+/* 轨道全部交给下面的 .pl-track 画，input 自己的轨道透明 */
+.sim-range input[type=range]::-webkit-slider-runnable-track{ height:4px; background:transparent; border:none; }
+.sim-range input[type=range]::-moz-range-track{ height:4px; background:transparent; border:none; }
+.sim-range input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+  background:#F4F1EA; border:2px solid #0B0B0C; margin-top:-8px;
+  box-shadow:0 2px 12px rgba(0,0,0,.7); cursor:grab;
+}
+.sim-range input[type=range]::-moz-range-thumb{
+  width:18px; height:18px; border-radius:50%;
+  background:#F4F1EA; border:2px solid #0B0B0C; box-shadow:0 2px 12px rgba(0,0,0,.7); cursor:grab;
+}
+.sim-range .pl-track{
+  position:absolute; left:10px; right:10px; top:50%; height:4px; margin-top:-2px;
+  border-radius:2px; background:rgba(244,241,234,.15); pointer-events:none;
+}
+.sim-range .pl-good{
+  position:absolute; top:0; height:4px; border-radius:2px;
+  background:linear-gradient(90deg,rgba(110,231,215,.75),rgba(110,231,215,.45));
+}
+.sim-scale{
+  display:flex; justify-content:space-between; margin:7px 10px 0;
+  font-family:var(--mono); font-size:10.5px; color:var(--faint); letter-spacing:.04em;
+}
+
+/* 结论区 */
+.pl-verdict{
+  margin-top:18px; padding:15px 17px; border-radius:var(--r-md);
+  font-size:var(--t-small); line-height:1.78; border:1px solid transparent;
+  transition:background .5s var(--e-apple), border-color .5s;
+}
+.pl-verdict.is-idle{ background:rgba(244,241,234,.05); color:var(--muted); border-color:rgba(244,241,234,.1); }
+.pl-verdict.is-ok{ background:rgba(110,231,215,.09); border-color:rgba(110,231,215,.34); color:#A7F3E6; }
+.pl-verdict.is-bad{ background:rgba(255,90,31,.09); border-color:rgba(255,90,31,.34); color:#FFD3C2; }
+.pl-verdict b{ color:var(--paper); }
+.pl-defect{ display:flex; gap:10px; padding:5px 0; align-items:baseline; }
+.pl-defect span{
+  flex:0 0 auto; font-weight:700; color:var(--hot);
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.1em;
+  padding:2px 8px; border-radius:999px; background:rgba(255,90,31,.16);
+}
+
+/* 缺陷指示灯 */
+.pl-flags{ display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; }
+.pl-flag{
+  font-size:11.5px; font-family:var(--mono); letter-spacing:.08em;
+  padding:5px 11px; border-radius:999px;
+  background:rgba(244,241,234,.05); border:1px solid rgba(244,241,234,.12);
+  color:var(--faint); transition:.45s var(--e-apple);
+}
+.pl-flag.is-on{
+  background:rgba(255,90,31,.18); border-color:var(--hot); color:#FFB694;
+  box-shadow:0 0 20px -4px rgba(255,90,31,.6);
+}
+
+/* 成本实验室 */
+.cl-bars{ display:flex; flex-direction:column; gap:13px; margin:6px 0 18px; }
+.cl-row{ display:grid; grid-template-columns:76px 1fr 74px; gap:12px; align-items:center; font-size:var(--t-small); }
+.cl-row .cl-name{ color:var(--muted); }
+.cl-track{ height:9px; border-radius:5px; background:rgba(244,241,234,.08); overflow:hidden; }
+.cl-track i{
+  display:block; height:100%; width:var(--w,0%);
+  border-radius:5px; transition:width .6s var(--e-apple);
+  background:linear-gradient(90deg,var(--hot),#FF8A4D);
+}
+.cl-row:nth-child(2) .cl-track i{ background:linear-gradient(90deg,var(--violet),#C4B5FD); }
+.cl-row:nth-child(3) .cl-track i{ background:linear-gradient(90deg,var(--mint),#A7F3E6); }
+.cl-val{ font-family:var(--mono); font-size:13px; text-align:right; font-variant-numeric:tabular-nums; }
+.cl-total{
+  display:flex; align-items:baseline; justify-content:space-between;
+  padding:16px 18px; border-radius:var(--r-md);
+  background:rgba(244,241,234,.05); border:1px solid rgba(244,241,234,.12);
+}
+.cl-total b{ font-size:clamp(26px,3vw,40px); font-family:var(--mono); letter-spacing:-.02em; }
+.cl-tip{ margin-top:14px; font-size:var(--t-small); line-height:1.7; padding:12px 15px; border-radius:var(--r-sm); }
+.cl-tip.is-ok{ background:rgba(110,231,215,.09); color:#A7F3E6; }
+.cl-tip.is-mid{ background:rgba(245,184,65,.1); color:#FBE0A8; }
+.cl-tip.is-warn{ background:rgba(255,90,31,.1); color:#FFD3C2; }
+.cl-mats{ display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 18px; }
+.cl-mat{
+  padding:8px 15px; border-radius:999px; font-size:var(--t-small); cursor:pointer;
+  background:rgba(244,241,234,.05); border:1px solid rgba(244,241,234,.13); color:var(--muted);
+  transition:.4s var(--e-apple);
+}
+.cl-mat:hover{ border-color:rgba(244,241,234,.3); color:var(--paper); }
+.cl-mat.is-on{ background:rgba(255,90,31,.16); border-color:var(--hot); color:#FFB694; }
+
+/* ═══ 进度系统 ═════════════════════════════════════ */
+.prog-bar{
+  height:6px; border-radius:3px; background:rgba(244,241,234,.09); overflow:hidden;
+}
+.prog-bar i{
+  display:block; height:100%; border-radius:3px;
+  background:linear-gradient(90deg,var(--hot),#F5B841);
+  transition:width 1s var(--e-apple);
+}
+.lesson-card.is-done{ border-color:rgba(110,231,215,.44) !important; }
+.lesson-card.is-done::after{
+  content:"✓"; position:absolute; top:12px; right:12px; z-index:3;
+  width:26px; height:26px; border-radius:50%;
+  background:var(--mint); color:#04241F; font-weight:800; font-size:14px;
+  display:grid; place-items:center; box-shadow:0 6px 18px -6px rgba(110,231,215,.8);
+}
+.lesson-card.is-last{ box-shadow:0 0 0 2px var(--hot), var(--sh-3); }
+.lesson-card{ position:relative; }
+
+/* ═══ 章节导航（苹果的产品页子导航）═══════════════ */
+.secnav{
+  position:fixed; left:0; right:0; top:0; z-index:60;
+  height:52px; display:flex; align-items:center;
+  background:var(--glass);
+  backdrop-filter:blur(22px) saturate(180%);
+  -webkit-backdrop-filter:blur(22px) saturate(180%);
+  border-bottom:1px solid rgba(244,241,234,.08);
+  transform:translateY(-100%);
+  transition:transform .6s var(--e-apple);
+}
+.secnav.is-on{ transform:none; }
+.secnav-in{ display:flex; align-items:center; gap:6px; width:100%;
+  max-width:var(--wrap); margin:0 auto; padding:0 clamp(16px,4vw,40px); }
+.secnav-t{ font-size:13.5px; font-weight:640; margin-right:auto; letter-spacing:-.01em; }
+.secnav a{
+  font-size:12.5px; color:var(--muted); text-decoration:none;
+  padding:7px 13px; border-radius:999px; transition:.35s var(--e-apple);
+}
+.secnav a:hover{ color:var(--paper); background:rgba(244,241,234,.07); }
+.secnav a.is-on{ color:var(--hot); background:rgba(255,90,31,.12); }
+@media (max-width:820px){ .secnav a{ display:none } .secnav a.is-on{ display:block } }
+
+/* ═══ 深色区块的层次（苹果的黑白交替）═════════════ */
+.sec--dark{ background:#08080A; }
+.sec--raise{ position:relative; z-index:1; }
+
+/* 数字卡片：更大、更苹果 */
+.stat-num{ font-size:clamp(38px,5vw,76px) !important; letter-spacing:var(--track-tighter) !important; font-weight:700; }
+
+/* 强调块的渐变描边 */
+.note,.aside{
+  border-radius:var(--r-lg) !important;
+  box-shadow:var(--sh-2);
+}
+
+/* ═══ 课程地图的进度 ═══════════════════════════════ */
+.prog-wrap{
+  margin:0 0 30px; padding:16px 20px; border-radius:var(--r-lg);
+  background:rgba(255,255,255,.035); border:1px solid rgba(244,241,234,.1);
+}
+.prog-meta{ display:flex; align-items:center; gap:14px; margin-top:12px; flex-wrap:wrap; }
+.prog-meta span{ font-size:13px; color:var(--muted); font-family:var(--mono); letter-spacing:.06em; }
+.prog-meta .btn{ margin-left:auto; }
+.prog-reset{
+  background:none; border:none; color:var(--faint); font-size:12px; cursor:pointer;
+  font-family:inherit; padding:6px 4px; transition:color .3s;
+}
+.prog-reset:hover{ color:var(--hot); }
+#progHint{ font-family:var(--mono); font-size:12px; letter-spacing:.08em; color:var(--mint); }
+
+/* 封面：scrub 用 */
+#heroTitle{ will-change:transform, opacity; }
+.course-strip{ will-change:transform; transform-origin:50% 100%; }
+
+/* 顶栏在首页也应玻璃化 */
+.course-home .topbar{ background:transparent; }
+
+/* 课程页：完成提示 */
+.done-flash{
+  position:absolute; right:16px; top:50%; transform:translateY(-50%);
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.1em;
+  color:var(--mint); background:rgba(110,231,215,.14);
+  border:1px solid rgba(110,231,215,.4); padding:5px 11px; border-radius:999px;
+  animation:flashIn .5s var(--e-apple);
+}
+@keyframes flashIn{ from{ opacity:0; transform:translateY(-50%) scale(.9) } }
+.topbar{ position:fixed; }
+
+/* 人体实验室读数 */
+.ergo-read{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:20px 0 4px;
+}
+.ergo-read > div{
+  padding:12px 14px; border-radius:var(--r-sm);
+  background:rgba(244,241,234,.045); border:1px solid rgba(244,241,234,.1);
+}
+.ergo-read span{ display:block; font-size:11.5px; color:var(--faint); margin-bottom:5px; letter-spacing:.04em; }
+.ergo-read b{ font-family:var(--mono); font-size:16px; font-variant-numeric:tabular-nums; }
+
+/* 手机端：滑块与次要按钮补足触控高度 */
+@media (max-width:720px){
+  .sim-range, .sim-range input[type=range]{ height:36px; }
+  .sim-range input[type=range]::-webkit-slider-thumb{ width:24px; height:24px; margin-top:-10px; }
+  .sim-ctl{ margin-bottom:26px; }
+  .prog-reset{ padding:10px 8px; min-height:40px; }
+  .secnav{ height:48px; }
+  .secnav-t{ font-size:12.5px; }
+}
+
+/* 章节导航出现时，顶栏让位（两者都是 fixed top:0，否则会叠在一起） */
+.topbar{ z-index:70; transition:transform .55s var(--e-apple), opacity .45s var(--e-apple); }
+body.secnav-on .topbar{ transform:translateY(-104%); opacity:0; pointer-events:none; }
+.secnav{ z-index:60; }
+.secnav-sep{ width:1px; height:18px; background:rgba(244,241,234,.16); margin:0 6px; }
+.secnav-map{ font-weight:600; }
+.secnav-arrow{
+  width:34px; height:34px; display:grid; place-items:center;
+  border-radius:50%; border:1px solid rgba(244,241,234,.16) !important;
+  color:var(--paper) !important; padding:0 !important;
+}
+.secnav-arrow:hover{ background:rgba(244,241,234,.1) !important; }
+@media (max-width:820px){
+  .secnav-sep, .secnav-map{ display:none; }
+  .secnav-arrow{ width:30px; height:30px; }
+}

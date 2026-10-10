@@ -6,6 +6,7 @@
 <title>工业设计 · 一学期 16 课</title>
 <meta name="description" content="大学工业设计专业导论课。一学期十六课，从一件真实的实物开始，每一课都落到学生自己动手。" />
 <link rel="stylesheet" href="assets/style.css" />
+<link rel="stylesheet" href="assets/apple-ui.css" />
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0b0c'/><circle cx='50' cy='42' r='26' fill='none' stroke='%23ff5a1f' stroke-width='9'/><path d='M26 78h48' stroke='%23f4f1ea' stroke-width='9' stroke-linecap='round'/></svg>" />
 </head>
 <body class="course-home">
@@ -19,6 +20,7 @@
     <span class="brand-text">工业设计<em>·</em>课程地图</span>
   </a>
   <div class="topbar-right">
+    <span class="key-hint" id="progHint" hidden></span>
     <button class="key-hint" id="helpBtn" type="button" aria-haspopup="dialog">快捷键 <kbd>?</kbd></button>
   </div>
 </header>
@@ -26,10 +28,10 @@
 <main>
 
   <!-- ═══ 封面 ═══ -->
-  <section class="sec hero hero--plain course-hero" data-title="课程">
+  <section class="sec hero hero--plain course-hero" data-title="课程" id="hero">
     <div class="wrap">
       <p class="kicker reveal">大学工业设计 · 专业导论</p>
-      <h1 class="hero-title">
+      <h1 class="hero-title" id="heroTitle">
         <span class="line reveal" data-d="1">十六次点火，</span>
         <span class="line reveal" data-d="2">不是十六篇讲义。</span>
       </h1>
@@ -40,7 +42,7 @@
         十六周之后，你未必会画图，<br>但你再也无法随便看待一件东西。
       </p>
       <div class="hero-cta reveal" data-d="4">
-        <a class="btn btn--primary" href="lessons/01-what-is-id.html">从第 1 课开始 →</a>
+        <a class="btn btn--primary" href="#lab">先玩一个 →</a>
         <a class="btn btn--ghost" href="#map">看完整课程地图</a>
       </div>
       <div class="hero-meta reveal" data-d="5">
@@ -52,35 +54,192 @@
     <div class="course-strip" id="courseStrip" aria-hidden="true"></div>
   </section>
 
+  <!-- ═══ 实验室 ①：注塑 ═══ -->
+  <section class="sec sec--dark" id="lab" data-title="开模实验室">
+    <div class="wrap">
+      <p class="kicker reveal">先玩一个 · 不用赔钱</p>
+      <h2 class="sec-title reveal">你来开一次模。</h2>
+      <p class="lead narrow reveal">
+        下面这台机器真的会失败。三个参数互相打架 —— 壁厚了会缩水，薄了会短射；
+        拔模角不够，零件会被硬拽出来刮花。调好，按「开模」。
+      </p>
+
+      <div class="sim reveal" data-lab="molding">
+        <div class="sim-head">
+          <h3>注塑实验室</h3>
+          <span class="sim-tag">第 06 课 · 材料与工艺</span>
+        </div>
+        <p class="sim-sub">
+          你要做的是一只塑料托盘。工厂只给你一副模具，参数定下去就不能改了 —— 和真实世界一样。
+        </p>
+
+        <div class="sim-grid">
+          <div class="sim-stage" id="moldStage">
+            <span class="stage-label">MOLD SIM</span>
+            <span class="stage-state" data-stage></span>
+            <div data-part></div>
+          </div>
+
+          <div>
+            <div class="sim-ctl">
+              <div class="sim-ctl-top"><label>壁厚</label><b data-read="wall">1.6 mm</b></div>
+              <div class="sim-range" data-range="wall">
+                <input type="range" data-k="wall" min="0.6" max="4" step="0.1" value="1.6" aria-label="壁厚" />
+                <div class="pl-track"><i class="pl-good"></i></div>
+                <i class="pl-knob"></i>
+              </div>
+              <div class="sim-scale"><span>0.6</span><span>理想 1.2–3.0</span><span>4.0</span></div>
+            </div>
+
+            <div class="sim-ctl">
+              <div class="sim-ctl-top"><label>拔模角</label><b data-read="draft">1.0°</b></div>
+              <div class="sim-range" data-range="draft">
+                <input type="range" data-k="draft" min="0" max="4" step="0.1" value="1" aria-label="拔模角" />
+                <div class="pl-track"><i class="pl-good"></i></div>
+                <i class="pl-knob"></i>
+              </div>
+              <div class="sim-scale"><span>0°</span><span>最少 1.0°</span><span>4°</span></div>
+            </div>
+
+            <div class="sim-ctl">
+              <div class="sim-ctl-top"><label>圆角</label><b data-read="r">1.0 mm</b></div>
+              <div class="sim-range" data-range="r">
+                <input type="range" data-k="r" min="0" max="4" step="0.1" value="1" aria-label="圆角" />
+                <div class="pl-track"><i class="pl-good"></i></div>
+                <i class="pl-knob"></i>
+              </div>
+              <div class="sim-scale"><span>0</span><span>最少 0.8</span><span>4</span></div>
+            </div>
+
+            <button class="btn btn--primary" data-mold type="button" style="width:100%">开模</button>
+
+            <div class="pl-flags">
+              <span class="pl-flag" data-flag="short">短射</span>
+              <span class="pl-flag" data-flag="sink">缩水</span>
+              <span class="pl-flag" data-flag="drag">拉伤</span>
+              <span class="pl-flag" data-flag="crack">应力开裂</span>
+            </div>
+
+            <div class="pl-verdict is-idle" data-verdict></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ 课程地图 ═══ -->
   <section class="sec" id="map" data-title="课程地图">
     <div class="wrap">
       <p class="kicker">课程地图</p>
       <h2 class="sec-title">一学期，十六个问题。</h2>
       <p class="lead narrow">
-        从"设计是什么"走到"你学会了问什么问题"。点任意一课开始。
+        从"设计是什么"走到"你学会了问什么问题"。点任意一课开始 —— 上过的课会自动标出来。
       </p>
+
+      <div class="prog-wrap reveal" id="progWrap" hidden>
+        <div class="prog-bar"><i id="progBar" style="width:0%"></i></div>
+        <div class="prog-meta">
+          <span id="progText">已完成 0 / 16</span>
+          <a class="btn btn--ghost btn--tiny" id="progGo" href="#">继续上次 →</a>
+          <button class="prog-reset" id="progReset" type="button">清空进度</button>
+        </div>
+      </div>
+
       <div class="course-map" id="courseMap"></div>
     </div>
   </section>
 
+  <!-- ═══ 实验室 ②：成本 ═══ -->
+  <section class="sec sec--alt" id="cost" data-title="成本实验室">
+    <div class="wrap">
+      <p class="kicker reveal">再玩一个</p>
+      <h2 class="sec-title reveal">你的设计值多少钱？</h2>
+      <p class="lead narrow reveal">
+        同一张图纸，做一千件和做一百万件，单件成本可以差十八倍。拖一下产量，看模具费怎么被摊薄。
+      </p>
+
+      <div class="sim reveal" data-lab="cost">
+        <div class="sim-head">
+          <h3>成本实验室</h3>
+          <span class="sim-tag">第 07 课 · 结构与成本</span>
+        </div>
+        <p class="sim-sub">一件体积 320 cm³ 的产品。改产量、改零件数、换材料，看单件成本怎么变。</p>
+
+        <div class="sim-grid">
+          <div>
+            <div class="sim-ctl">
+              <div class="sim-ctl-top"><label>产量</label><b data-qty>10 万件</b></div>
+              <div class="sim-range">
+                <input type="range" data-k2="qty" min="3" max="6.3" step="0.05" value="5" aria-label="产量" />
+              </div>
+              <div class="sim-scale"><span>1 千</span><span>10 万</span><span>200 万</span></div>
+            </div>
+
+            <div class="sim-ctl">
+              <div class="sim-ctl-top"><label>零件数</label><b data-parts>6 个</b></div>
+              <div class="sim-range">
+                <input type="range" data-k2="parts" min="1" max="24" step="1" value="6" aria-label="零件数" />
+              </div>
+              <div class="sim-scale"><span>1</span><span>每多一个零件，多一道工位</span><span>24</span></div>
+            </div>
+
+            <div class="sim-ctl">
+              <div class="sim-ctl-top"><label>材料</label><b data-mat>ABS 塑料</b></div>
+              <div class="cl-mats">
+                <button class="cl-mat is-on" data-matbtn="abs" type="button">ABS</button>
+                <button class="cl-mat" data-matbtn="pp" type="button">PP</button>
+                <button class="cl-mat" data-matbtn="al" type="button">铝合金</button>
+                <button class="cl-mat" data-matbtn="steel" type="button">不锈钢</button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="cl-bars">
+              <div class="cl-row" data-bar="材料">
+                <span class="cl-name">材料</span>
+                <span class="cl-track"><i></i></span>
+                <span class="cl-val">¥0</span>
+              </div>
+              <div class="cl-row" data-bar="工时">
+                <span class="cl-name">装配工时</span>
+                <span class="cl-track"><i></i></span>
+                <span class="cl-val">¥0</span>
+              </div>
+              <div class="cl-row" data-bar="模具分摊">
+                <span class="cl-name">模具分摊</span>
+                <span class="cl-track"><i></i></span>
+                <span class="cl-val">¥0</span>
+              </div>
+            </div>
+            <div class="cl-total">
+              <span style="color:var(--muted);font-size:13px">单件成本</span>
+              <b data-total>¥0</b>
+            </div>
+            <div class="cl-tip is-ok" data-tip></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ 课程说明 ═══ -->
-  <section class="sec sec--alt" data-title="课程说明">
+  <section class="sec" data-title="课程说明">
     <div class="wrap">
       <p class="kicker">课程说明</p>
       <h2 class="sec-title">这门课怎么上。</h2>
       <div class="card-grid">
-        <article class="kw reveal">
+        <article class="kw reveal has-glow">
           <div class="kw-num">01</div>
           <h3>每课 45 分钟 <span>节奏</span></h3>
           <p>每一课都是同样的骨架：先看见一件真实的实物 → 再讲透一个概念 → 最后留出时间让你自己动手。时间不够时，砍掉中间，保住最后一步。</p>
         </article>
-        <article class="kw reveal" data-d="1">
+        <article class="kw reveal has-glow" data-d="1">
           <div class="kw-num">02</div>
           <h3>每课都要动手 <span>课上</span></h3>
           <p>没有一次是坐着听完的。你会在课堂上画、量、拆、猜、投票。带一支笔和一张纸就够 —— 画得丑不影响你的分数。</p>
         </article>
-        <article class="kw reveal" data-d="2">
+        <article class="kw reveal has-glow" data-d="2">
           <div class="kw-num">03</div>
           <h3>带走的不是知识点 <span>评价</span></h3>
           <p>这学期真正要养成的，是看见一件东西就问"它为什么非得长这样"的习惯。第 16 课，你们会互相评对方的作品。</p>
@@ -129,6 +288,9 @@
 <script src="assets/objects.js"></script>
 <script src="assets/diagrams.js"></script>
 <script src="assets/illustrations.js"></script>
+<script src="assets/illustrations2.js"></script>
+<script src="assets/motion.js"></script>
+<script src="assets/play.js"></script>
 <script src="assets/course-home.js"></script>
 </body>
 </html>

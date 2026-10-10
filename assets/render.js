@@ -395,6 +395,70 @@ ${SHOT(b)}
     </div>
   </section>`;
 
+  /* ── 可玩实验室（学生真的能调参、真的会失败）──────────
+     b.kind 决定用哪个模拟器；controls/stage 由这里按类型生成，
+     play.js 只负责逻辑，渲染与内容分离。                        */
+  B.sim = b => {
+    const kind = b.kind || 'ergo';
+    const stage = kind === 'ergo'
+      ? `<div class="sim-stage"><span class="stage-label">BODY FIT</span>
+           <div data-figure></div></div>`
+      : `<div class="sim-stage"><span class="stage-label">MOLD SIM</span>
+           <span class="stage-state" data-stage></span><div data-part></div></div>`;
+
+    const ctl = (label, key, min, max, step, val, read, scale) => `
+      <div class="sim-ctl">
+        <div class="sim-ctl-top"><label>${label}</label><b ${read ? `data-read="${read}"` : ''}>${val}</b></div>
+        <div class="sim-range"${key ? ` data-range="${key}"` : ''}>
+          <input type="range" ${key ? `data-k="${key}"` : 'data-k2="h"'} min="${min}" max="${max}" step="${step}" value="${val.replace(/[^0-9.]/g, '') || min}" aria-label="${label}">
+          <div class="pl-track"><i class="pl-good"></i></div>
+        </div>
+        <div class="sim-scale"><span>${scale[0]}</span><span>${scale[1]}</span><span>${scale[2]}</span></div>
+      </div>`;
+
+    let controls = '';
+    if (kind === 'ergo') {
+      controls = ctl('身高', '', 148, 196, 1, '170 cm', 'hTop', ['148', '拖动试试', '196']);
+    } else if (kind === 'molding') {
+      controls = ctl('壁厚', 'wall', 0.6, 4, 0.1, '1.6 mm', 'wall', ['0.6', '理想 1.2–3.0', '4.0'])
+               + ctl('拔模角', 'draft', 0, 4, 0.1, '1.0°', 'draft', ['0°', '最少 1.0°', '4°'])
+               + ctl('圆角', 'r', 0, 4, 0.1, '1.0 mm', 'r', ['0', '最少 0.8', '4'])
+               + `<button class="btn btn--primary" data-mold type="button" style="width:100%">开模</button>
+                  <div class="pl-flags">
+                    <span class="pl-flag" data-flag="short">短射</span>
+                    <span class="pl-flag" data-flag="sink">缩水</span>
+                    <span class="pl-flag" data-flag="drag">拉伤</span>
+                    <span class="pl-flag" data-flag="crack">应力开裂</span>
+                  </div>`;
+    }
+    const readouts = kind === 'ergo'
+      ? `<div class="ergo-read">
+           <div><span>身高</span><b data-h>170 cm</b></div>
+           <div><span>腘窝高</span><b data-leg>41.7 cm</b></div>
+           <div><span>需要座高</span><b data-need>42 cm</b></div>
+         </div>`
+      : '';
+
+    return `<section class="sec${b.alt ? ' sec--alt' : ''}" data-title="${esc(b.nav || '实验室')}">
+      <div class="wrap">
+        ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
+        ${b.title ? `<h2 class="sec-title reveal">${R(b.title)}</h2>` : ''}
+        ${b.lead ? `<p class="lead narrow reveal">${R(b.lead)}</p>` : ''}
+        <div class="sim reveal" data-lab="${esc(kind)}">
+          <div class="sim-head"><h3>${b.name || '实验室'}</h3>${b.tag ? `<span class="sim-tag">${esc(b.tag)}</span>` : ''}</div>
+          ${b.sub ? `<p class="sim-sub">${R(b.sub)}</p>` : ''}
+          <div class="sim-grid">
+            ${stage}
+            <div>${controls}${readouts}
+              <div class="pl-verdict is-idle" data-verdict${kind === 'ergo' ? ' data-ergo-verdict' : ''}></div>
+            </div>
+          </div>
+        </div>
+        ${b.note ? `<p class="note reveal">${R(b.note)}</p>` : ''}
+      </div>
+    </section>`;
+  };
+
   // ── 组装 ─────────────────────────────────────────────
   window.renderLesson = function (lesson) {
     const blocks = (lesson && lesson.blocks) || [];

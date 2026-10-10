@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   课程首页 —— 课程地图
+   课程首页 —— 运动 / 进度 / 实验室 / 课程地图
    ═══════════════════════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -10,6 +10,8 @@
   const IMG = (k, size) => `assets/img/${k}-${size}.webp`;
   const OBJ = window.OBJ || {};
   const COURSE = window.COURSE || { lessons: [] };
+  const M = window.MOTION, P = window.PLAY;
+  const PROG = P && P.PROGRESS;
 
   /* ── 封面图片带 ──────────────────────────────────────── */
   const strip = $('#courseStrip');
@@ -23,13 +25,19 @@
     }).join('');
   }
 
-  /* ── 课程地图 ────────────────────────────────────────── */
+  /* ── 课程地图（带进度标记）──────────────────────────── */
   const map = $('#courseMap');
+  const done = PROG ? PROG.done() : {};
+  const lastId = PROG ? PROG.last() : null;
+
   if (map) {
     map.innerHTML = COURSE.lessons.map((l, i) => {
       const o = OBJ[l.cover] || {};
       const img = o.img || l.cover;
-      return `<a class="lesson-card reveal" data-d="${i % 4}" href="lessons/${esc(l.file)}"
+      const isDone = !!done[l.id];
+      const isLast = l.id === lastId && !isDone;
+      return `<a class="lesson-card reveal${isDone ? ' is-done' : ''}${isLast ? ' is-last' : ''}"
+                 data-d="${i % 4}" href="lessons/${esc(l.file)}"
                  style="--accent:${esc(l.accent || '#FF5A1F')}">
         <span class="lesson-frame">
           <img src="${IMG(img, 'card')}" alt="" loading="lazy" decoding="async" style="object-position:${o.pos || '50% 50%'}">
@@ -39,10 +47,37 @@
           <span class="lesson-tag">${esc(l.tag || '')}</span>
           <b>${l.title}</b>
           <span class="lesson-q">${esc(l.q || '')}</span>
-          <span class="lesson-cta">进入第 ${esc(l.id)} 课 <i>→</i></span>
+          <span class="lesson-cta">${isDone ? '再看一遍' : (isLast ? '从这里继续' : `进入第 ${esc(l.id)} 课`)} <i>→</i></span>
         </span>
       </a>`;
     }).join('');
+  }
+
+  /* ── 进度条 ─────────────────────────────────────────── */
+  const progWrap = $('#progWrap');
+  if (progWrap && PROG) {
+    const n = PROG.count(), total = COURSE.lessons.length || 16;
+    if (n > 0) {
+      progWrap.hidden = false;
+      requestAnimationFrame(() => { $('#progBar').style.width = (n / total * 100).toFixed(1) + '%'; });
+      $('#progText').textContent = `已完成 ${n} / ${total} 课`;
+      const li = COURSE.lessons.find(l => l.id === lastId);
+      if (li) {
+        $('#progGo').href = 'lessons/' + li.file;
+        $('#progGo').textContent = `继续第 ${li.id} 课 →`;
+      } else {
+        const nx = COURSE.lessons.find(l => !done[l.id]);
+        if (nx) { $('#progGo').href = 'lessons/' + nx.file; $('#progGo').textContent = `继续第 ${nx.id} 课 →`; }
+      }
+      const hint = $('#progHint');
+      if (hint) { hint.hidden = false; hint.textContent = `${n}/${total} 课`; }
+    }
+    const rb = $('#progReset');
+    if (rb) rb.addEventListener('click', () => {
+      PROG.reset(); progWrap.hidden = true;
+      $$('.lesson-card').forEach(c => c.classList.remove('is-done'));
+      const hint = $('#progHint'); if (hint) hint.hidden = true;
+    });
   }
 
   /* ── 署名 ────────────────────────────────────────────── */
@@ -54,34 +89,50 @@
     if (s) s.textContent = `展开查看全部 ${CR.length} 项署名`;
   }
 
-  /* ── 滚动出现 / 进度 / 顶栏 ──────────────────────────── */
-  const wall = null;
-  const io = new IntersectionObserver(es => {
-    es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
-  }, { threshold: 0.1, rootMargin: '0px 0px -6% 0px' });
-  $$('.reveal, .kw').forEach(el => io.observe(el));
+  /* ── 运动：揭示 / 顶栏 / 进度条 / 封面滚动 ──────────── */
+  if (M) {
+    M.reveal();
+    const bar = $('#bar');
+    if (bar) M.progressBar(bar);
+    M.magnetic('.btn', .18);
+    M.cursorGlow('.has-glow');
+    M.anchors();
 
-  document.addEventListener('pointermove', e => {
-    const kw = e.target.closest && e.target.closest('.kw');
-    if (!kw) return;
-    const r = kw.getBoundingClientRect();
-    kw.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-    kw.style.setProperty('--my', (e.clientY - r.top) + 'px');
-  }, { passive: true });
+    // 顶栏变实
+    const top = $('#topbar');
+    M.scrub('body', () => {
+      if (top) top.classList.toggle('is-stuck', scrollY > 40);
+    });
 
-  const bar = $('#bar');
-  let ticking = false;
-  function onScroll() {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      if (bar) bar.style.width = (max > 0 ? Math.min(100, (window.scrollY / max) * 100) : 0) + '%';
-      ticking = false;
+    // 封面：标题随滚动轻微上移并淡出，图片带反向抬升
+    const ht = $('#heroTitle');
+    M.scrub('#hero', (el, p, c) => {
+      if (window.innerWidth < 760) return;
+      if (ht) { ht.style.transform = `translateY(${-c * 26}px)`; ht.style.opacity = String(Math.max(0, 1 - Math.max(0, c) * 1.5)); }
+      if (strip) strip.style.transform = `translateY(${Math.max(0, c) * -34}px) scale(${1 + Math.max(0, c) * .05})`;
+    });
+  } else {
+    // 降级：没有运动引擎也要能看
+    const bar = $('#bar');
+    window.addEventListener('scroll', () => {
+      const max = document.documentElement.scrollHeight - innerHeight;
+      if (bar) bar.style.width = (max > 0 ? Math.min(100, scrollY / max * 100) : 0) + '%';
+    }, { passive: true });
+  }
+
+  /* ── 实验室 ─────────────────────────────────────────── */
+  if (P && P.init) {
+    P.init();
+    // 开模结果不同 → 轻微反馈
+    const lab = document.querySelector('[data-lab="molding"]');
+    if (lab) lab.addEventListener('molded', e => {
+      const bad = e.detail.bad;
+      const stage = $('#moldStage');
+      if (!stage) return;
+      stage.style.borderColor = bad.length ? 'rgba(255,90,31,.5)' : 'rgba(110,231,215,.5)';
+      setTimeout(() => { stage.style.borderColor = ''; }, 1400);
     });
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
 
   /* ── 快捷键面板 ──────────────────────────────────────── */
   const help = $('#helpModal');

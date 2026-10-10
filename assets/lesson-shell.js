@@ -246,6 +246,73 @@
     }
   });
 
+
+  /* ═══════════════════════════════════════════════════════
+     苹果式增强：章节子导航 / 滚动驱动 / 进度记录
+     ═══════════════════════════════════════════════════════ */
+  const M = window.MOTION, PLAY = window.PLAY;
+
+  // ① 章节子导航（滚过封面后从顶部滑下）
+  if (SECS.length > 3) {
+    const nav = document.createElement('nav');
+    nav.className = 'secnav';
+    nav.setAttribute('aria-label', '本课章节');
+    nav.innerHTML = `<div class="secnav-in">
+      <span class="secnav-t">${esc(lesson.short || ('第 ' + lesson.id + ' 课'))}</span>
+      ${SECS.slice(1).map((s, i) => `<a href="#s${i + 1}">${esc(s.dataset.title || ('第 ' + (i + 2) + ' 节')).slice(0, 8)}</a>`).join('')}
+      <span class="secnav-sep"></span>
+      <a class="secnav-map" href="${B}index.html">课程地图</a>
+      ${prev ? `<a class="secnav-arrow" href="${esc(prev.file)}" title="上一课">←</a>` : ''}
+      ${next ? `<a class="secnav-arrow" href="${esc(next.file)}" title="下一课">→</a>` : ''}
+    </div>`;
+    document.body.appendChild(nav);
+    const links = [...nav.querySelectorAll('a')];
+    const sync = () => {
+      const on = scrollY > innerHeight * 0.7;
+      nav.classList.toggle('is-on', on);
+      document.body.classList.toggle('secnav-on', on);
+      links.forEach((a, i) => a.classList.toggle('is-on', i + 1 === activeIdx));
+    };
+    sync();
+    window.addEventListener('scroll', () => requestAnimationFrame(sync), { passive: true });
+  }
+
+  // ② 滚动驱动 / 揭示 / 进度条 / 磁吸按钮
+  if (M) {
+    M.reveal();
+    const bar = document.getElementById('bar');
+    if (bar) M.progressBar(bar);
+    M.magnetic('.btn', .16);
+    M.cursorGlow('.kw, .case-card, .lesson-card');
+    // 每张图的轻微视差（幅度很小，只为"活"起来）
+    M.parallax('.fig-frame img', .035);
+  }
+
+  // ③ 进度记录：读到接近结尾就算完成
+  if (PLAY && PLAY.PROGRESS) {
+    let marked = false;
+    const check = () => {
+      if (marked) return;
+      const h = document.documentElement.scrollHeight - innerHeight;
+      if (h > 0 && scrollY / h > 0.82) {
+        marked = true;
+        PLAY.PROGRESS.mark(lesson.id);
+        // 顶栏给一个很轻的提示
+        if (topbar) {
+          const t = document.createElement('span');
+          t.className = 'done-flash';
+          t.textContent = '✓ 已记录';
+          topbar.appendChild(t);
+          setTimeout(() => t.remove(), 2600);
+        }
+      }
+    };
+    check();
+    window.addEventListener('scroll', () => requestAnimationFrame(check), { passive: true });
+  }
+
+  if (PLAY && PLAY.init) PLAY.init();
+
   /* ── 互动（必须放在弹窗生成之后：objectModal 依赖 #objModal 才能绑定）── */
   window.LABS.init();
   $$('.reveal, .kw').forEach(el => { if (!el.classList.contains('is-in')) io.observe(el); });
