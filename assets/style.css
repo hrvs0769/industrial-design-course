@@ -431,6 +431,7 @@ input[type=range]::-moz-range-thumb{ width:26px; height:26px; border-radius:50%;
 .modal-x:hover{ background:rgba(244,241,234,.14); color:var(--paper); }
 
 .obj-modal .modal-card{
+  max-height:90vh; overflow-y:auto;
   max-width:1080px; background:var(--wall); color:var(--wall-ink); border-color:rgba(20,19,14,.12);
   padding:0; overflow:hidden; display:grid; grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);
   animation:rise .45s var(--ease-out);
@@ -444,6 +445,9 @@ input[type=range]::-moz-range-thumb{ width:26px; height:26px; border-radius:50%;
 .obj-label h3{ margin:0 0 8px; font-size:clamp(22px,2.5vw,32px); font-weight:800; letter-spacing:-.025em; line-height:1.25; color:var(--wall-ink); }
 .obj-label-by{ margin:0 0 22px; font-family:var(--mono); font-size:12.5px; color:var(--wall-faint); letter-spacing:.04em; }
 .obj-label-body{ margin:0 0 22px; font-size:15px; line-height:1.9; color:rgba(20,19,14,.80); }
+.obj-label-body p{ margin:0 0 14px; }
+.obj-label-body p:last-child{ margin-bottom:0; }
+.obj-photo{ max-height:min(58vh,560px); }
 .obj-lesson{ padding:16px 20px; border-radius:10px; background:rgba(255,90,31,.09); border-left:3px solid var(--hot); font-size:14.5px; line-height:1.8; color:rgba(20,19,14,.88); }
 .obj-lesson b{ color:#B33A0B; }
 .obj-draft{ margin-top:20px; display:flex; gap:14px; align-items:center; padding-top:18px; border-top:1px solid var(--wall-line); }

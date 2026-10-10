@@ -151,7 +151,7 @@
       year.textContent = o.year;
       title.textContent = o.name;
       by.textContent = o.by;
-      body.textContent = o.body;
+      body.innerHTML = String(o.body).split(/\n\s*\n/).map(t => `<p>${esc(t)}</p>`).join('');
       lesson.textContent = o.lesson;
       if (o.draft) {
         draft.hidden = false;

@@ -175,7 +175,7 @@
           <p class="obj-label-year" id="objYear"></p>
           <h3 id="objTitle"></h3>
           <p class="obj-label-by" id="objBy"></p>
-          <p class="obj-label-body" id="objBody"></p>
+          <div class="obj-label-body" id="objBody"></div>
           <div class="obj-lesson"><b>它教会我们：</b><span id="objLesson"></span></div>
           <div class="obj-draft" id="objDraft" hidden></div>
         </div>

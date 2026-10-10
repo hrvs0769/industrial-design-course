@@ -20,6 +20,7 @@ window.DIAGRAMS = {
     <g transform="translate(10,34)">
       <rect x="0" y="0" width="270" height="250" rx="14" fill="rgba(244,241,234,.03)" stroke="rgba(244,241,234,.14)"/>
       <text x="20" y="32" fill="#FF5A1F" font-size="15" font-weight="700" font-family="system-ui">① 拔模角</text>
+      <text x="112" y="32" fill="rgba(244,241,234,.5)" font-size="11.5" font-family="system-ui">模具必须留的小斜度</text>
       <!-- 模具剖面上半 -->
       <path d="M62 72 L208 72 L197 118 L73 118 Z" fill="rgba(244,241,234,.10)" stroke="#F4F1EA" stroke-width="2"/>
       <!-- 制品 -->
@@ -47,9 +48,9 @@ window.DIAGRAMS = {
       <!-- 坏的：厚薄不均 + 缩水 -->
       <path d="M158 74 L238 74 L238 96 L180 96 L180 200 L238 200 L238 222 L158 222 Z" fill="rgba(255,90,31,.22)" stroke="#FF5A1F" stroke-width="2"/>
       <path d="M258 84 q-16 14 0 28" fill="none" stroke="#FF5A1F" stroke-width="2"/>
-      <text x="196" y="164" fill="#FF5A1F" font-size="13" font-family="system-ui">缩水</text>
+      <text x="186" y="164" fill="#FF5A1F" font-size="12.5" font-family="system-ui">缩水（塌陷）</text>
       <text x="20" y="230" fill="rgba(244,241,234,.55)" font-size="12.5" font-family="system-ui">厚的地方冷得慢，会塌陷。</text>
-      <text x="20" y="248" fill="rgba(244,241,234,.55)" font-size="12.5" font-family="system-ui">所以加强筋比加厚更聪明。</text>
+      <text x="20" y="248" fill="rgba(244,241,234,.55)" font-size="12.5" font-family="system-ui">所以加一道筋，比直接加厚更聪明。</text>
     </g>
 
     <!-- ③ 圆角 -->
@@ -60,11 +61,11 @@ window.DIAGRAMS = {
       <rect x="44" y="88" width="76" height="88" fill="rgba(255,90,31,.20)" stroke="#FF5A1F" stroke-width="2"/>
       <path d="M108 76 l24 24" stroke="#FF5A1F" stroke-width="2.5"/>
       <path d="M132 76 l-24 24" stroke="#FF5A1F" stroke-width="2.5"/>
-      <text x="42" y="200" fill="#FF5A1F" font-size="12.5" font-family="system-ui">尖角＝应力集中</text>
+      <text x="42" y="200" fill="#FF5A1F" font-size="12.5" font-family="system-ui">尖角＝力都挤在这一点</text>
       <!-- 圆角 -->
       <rect x="162" y="88" width="76" height="88" rx="20" ry="20" fill="rgba(110,231,215,.20)" stroke="#6EE7D7" stroke-width="2"/>
       <path d="M162 108 a20 20 0 0 1 20 -20" fill="none" stroke="#6EE7D7" stroke-width="3"/>
-      <text x="160" y="200" fill="#6EE7D7" font-size="12.5" font-family="system-ui">圆角＝力顺下去</text>
+      <text x="160" y="200" fill="#6EE7D7" font-size="12.5" font-family="system-ui">圆角＝力顺着走开</text>
       <text x="20" y="230" fill="rgba(244,241,234,.55)" font-size="12.5" font-family="system-ui">你在屏幕上画的每一个尖角，</text>
       <text x="20" y="248" fill="rgba(244,241,234,.55)" font-size="12.5" font-family="system-ui">在钢模上都是一个裂点。</text>
     </g>
@@ -182,21 +183,21 @@ window.DIAGRAMS = {
         <path d="M0 0 L10 5 L0 10 z" fill="#F4F1EA"/>
       </marker>
     </defs>
-    <text x="30" y="30" fill="#FF5A1F" font-size="15" font-weight="700" font-family="system-ui">公差叠加：每多一个零件，误差就多一份</text>
+    <text x="30" y="30" fill="#FF5A1F" font-size="15" font-weight="700" font-family="system-ui">公差叠加：每个零件都允许有一点误差，装起来误差会相加</text>
 
     <!-- 三个零件 -->
     <g transform="translate(30,60)">
       <rect x="0" y="0" width="150" height="52" rx="8" fill="rgba(244,241,234,.08)" stroke="rgba(244,241,234,.42)" stroke-width="2"/>
       <text x="75" y="33" fill="rgba(244,241,234,.8)" font-size="13" text-anchor="middle" font-family="system-ui">零件 A</text>
-      <text x="75" y="74" fill="rgba(244,241,234,.45)" font-size="12" text-anchor="middle" font-family="system-ui">±0.10</text>
+      <text x="75" y="74" fill="rgba(244,241,234,.45)" font-size="12" text-anchor="middle" font-family="system-ui">误差 ±0.10 毫米</text>
 
       <rect x="200" y="0" width="150" height="52" rx="8" fill="rgba(244,241,234,.08)" stroke="rgba(244,241,234,.42)" stroke-width="2"/>
       <text x="275" y="33" fill="rgba(244,241,234,.8)" font-size="13" text-anchor="middle" font-family="system-ui">零件 B</text>
-      <text x="275" y="74" fill="rgba(244,241,234,.45)" font-size="12" text-anchor="middle" font-family="system-ui">±0.10</text>
+      <text x="275" y="74" fill="rgba(244,241,234,.45)" font-size="12" text-anchor="middle" font-family="system-ui">误差 ±0.10 毫米</text>
 
       <rect x="400" y="0" width="150" height="52" rx="8" fill="rgba(244,241,234,.08)" stroke="rgba(244,241,234,.42)" stroke-width="2"/>
       <text x="475" y="33" fill="rgba(244,241,234,.8)" font-size="13" text-anchor="middle" font-family="system-ui">零件 C</text>
-      <text x="475" y="74" fill="rgba(244,241,234,.45)" font-size="12" text-anchor="middle" font-family="system-ui">±0.10</text>
+      <text x="475" y="74" fill="rgba(244,241,234,.45)" font-size="12" text-anchor="middle" font-family="system-ui">误差 ±0.10 毫米</text>
 
       <!-- 装配 -->
       <rect x="620" y="0" width="220" height="52" rx="8" fill="rgba(255,90,31,.16)" stroke="#FF5A1F" stroke-width="2"/>
@@ -214,7 +215,7 @@ window.DIAGRAMS = {
         所以设计师的减法不是审美偏好，是成本与精度的算术：能把 3 个零件合成 1 个，就同时省掉了模具、装配工位、库存和两份公差。
       </text>
       <text x="24" y="80" fill="rgba(244,241,234,.45)" font-size="12.5" font-family="system-ui">
-        宜家 Billy 书架只有一块板、几个螺丝 —— 这句话的背后是这个算式。
+        宜家 Billy 书架只有一块板、几颗螺丝 —— 便宜的秘密就在这个算式里。
       </text>
     </g>
   </svg>`
