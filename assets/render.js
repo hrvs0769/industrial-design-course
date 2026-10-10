@@ -23,6 +23,16 @@
 
   const B = {};
 
+  // 章节自带配图（可选字段 b.shot = {img, cap}）—— 让每个文字区块都能有一张图
+  const SHOT = (b, cls) => b.shot ? `
+    <figure class="sec-shot ${cls || ''} reveal">
+      <div class="fig-frame" style="--ar:${frameAR(b.shot.img)}">
+        <img src="${IMG(b.shot.img, 'card')}" alt="${esc(b.shot.alt || '')}" loading="lazy" decoding="async"
+             style="object-position:${b.shot.pos || '50% 50%'}">
+      </div>
+      ${b.shot.cap ? `<figcaption>${R(b.shot.cap)}</figcaption>` : ''}
+    </figure>` : '';
+
   // 封面
   B.hero = b => {
     const vit = (b.vitrine || []).filter(k => OBJ[k]);
@@ -70,6 +80,7 @@
       <div class="wrap">
         ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
         ${b.title ? `<h2 class="sec-title reveal">${R(b.title)}</h2>` : ''}
+        ${SHOT(b)}
         <div class="${cards.length ? 'two-col' : 'prose-single'}">
           <div class="col-text">${text}</div>
           ${cards.length ? `<div class="col-cards">${cardHtml}</div>` : ''}
@@ -84,6 +95,7 @@
       ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
       ${b.title ? `<h2 class="sec-title reveal">${R(b.title)}</h2>` : ''}
       ${b.lead ? `<p class="lead narrow reveal">${R(b.lead)}</p>` : ''}
+${SHOT(b)}
       <div class="card-grid">${(b.items || []).map((c, i) => `
         <article class="kw reveal" data-d="${i % 4}">
           <div class="kw-num">${esc(c.n || String(i + 1).padStart(2, '0'))}</div>
@@ -231,6 +243,7 @@
       ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
       <h2 class="sec-title reveal">${R(b.title)}</h2>
       ${b.lead ? `<p class="lead narrow reveal">${R(b.lead)}</p>` : ''}
+${SHOT(b)}
       <div class="flow reveal" id="flow"></div>
       ${b.myths ? `<div class="myth-grid">${b.myths.map((m, i) => `
         <div class="myth reveal" data-d="${i % 3}"><h4>${m.h}</h4><p>${R(m.p)}</p></div>`).join('')}</div>` : ''}
@@ -309,6 +322,7 @@
     <div class="wrap">
       ${b.kicker ? `<p class="kicker reveal">${b.kicker}</p>` : ''}
       <h2 class="sec-title reveal">${R(b.title)}</h2>
+      ${SHOT(b)}
       <div class="stats">${(b.items || []).map((s, i) => `
         <div class="stat reveal" data-d="${i % 4}">
           <div class="stat-num" data-to="${+s.to}" data-suffix="${esc(s.suffix || '')}">0${esc(s.suffix || '')}</div>
