@@ -134,7 +134,7 @@
             const o = obj(it.id);
             return `<div class="sp-item" data-x="${+it.x}" style="--x:${+it.x}%">
               <span class="sp-shot"><img src="${IMG(o.img, 'card')}" alt="${esc(o.name)}" loading="lazy" decoding="async" style="object-position:${o.pos || '50% 50%'}"></span>
-              <b>${esc(it.label || o.name.replace(/（.*?）/, ''))}</b><span>${esc(it.sub || o.year)}</span>
+              <b>${esc(it.label || o.name.replace(/（.*?）/, ''))}</b><span class="sp-year">${esc(it.sub || o.year)}</span>
             </div>`;
           }).join('')}</div>
         </div>
@@ -373,7 +373,7 @@
       <div class="dg-list">
         ${(b.items || []).map(it => `
           <figure class="dg reveal">
-            <div class="dg-frame">${(window.DIAGRAMS || {})[it.d] || ''}</div>
+            <div class="dg-frame"><div class="dg-scroll">${(window.DIAGRAMS || {})[it.d] || ''}</div></div>
             ${it.cap ? `<figcaption>${R(it.cap)}</figcaption>` : ''}
           </figure>`).join('')}
       </div>

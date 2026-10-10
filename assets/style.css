@@ -314,12 +314,12 @@ kbd{
   border-radius:13px; background:var(--ink-3); border:1px solid var(--line);
 }
 .sp-shot{
-  width:100%; aspect-ratio:1/1; border-radius:8px; overflow:hidden; margin-bottom:9px;
+  display:block; width:100%; aspect-ratio:1/1; border-radius:8px; overflow:hidden; margin-bottom:9px;
   background:#1b1b1f;
 }
 .sp-shot img{ width:100%; height:100%; object-fit:cover; display:block; }
 .sp-item b{ display:block; font-size:12.5px; font-weight:650; letter-spacing:.01em; }
-.sp-item span{ display:block; font-size:10.5px; color:var(--faint); font-family:var(--mono); margin-top:2px; }
+.sp-year{ display:block; font-size:10.5px; color:var(--faint); font-family:var(--mono); margin-top:2px; }
 .sp-item.is-near{ border-color:var(--hot); box-shadow:0 16px 40px -16px rgba(255,90,31,.9); background:#1b1512; }
 
 .spectrum-range{ display:flex; align-items:center; gap:26px; }
@@ -627,7 +627,7 @@ input[type=range]::-moz-range-thumb{ width:26px; height:26px; border-radius:50%;
   .end-grid{ grid-template-columns:1fr; }
   .spectrum-labels .mid{ display:none; }
   .sp-item{ width:78px; padding:6px 5px 8px; }
-  .sp-item b{ font-size:10px } .sp-item span{ display:none }
+  .sp-item b{ font-size:10px } .sp-year{ display:none }
   .hero-meta .sep{ display:none; }
   .vote-body{ flex-direction:column; align-items:flex-start; }
   .gallery{ grid-template-columns:repeat(2,1fr); }
@@ -812,3 +812,112 @@ code{ font-family:var(--mono); font-size:.88em; padding:2px 7px; border-radius:6
 .dg-frame svg{ width:100%; height:auto; display:block; }
 .dg figcaption{ margin-top:14px; font-size:13.5px; color:var(--muted); line-height:1.8; }
 @media (max-width:720px){ .dg-frame{ padding:12px; } .dg-frame svg text{ font-size:11px; } }
+
+/* ═══════════════════════════════════════════════
+   手机端专项修正
+   ═══════════════════════════════════════════════ */
+
+/* ① 长按钮不再撑破视口（原 white-space:nowrap 遇到长文案会溢出） */
+.btn{ max-width:100%; }
+@media (max-width:640px){
+  .btn{ white-space:normal; text-align:center; line-height:1.5; }
+  .next-lesson .btn{ padding:14px 22px; }
+  .hero-cta{ flex-direction:column; align-items:stretch; }
+  .hero-cta .btn{ width:100%; }
+}
+
+/* ② 触控目标不小于 44×44（Apple/Google 的推荐最小值） */
+.nav-arrow{ width:44px; height:44px; font-size:16px; }
+.brand{ padding:10px 0; }
+.vitrine-nav{ padding:8px 0; }
+.vitrine-nav button{ height:20px; background:transparent; position:relative; }
+.vitrine-nav button::before{
+  content:""; position:absolute; left:0; right:0; top:50%; height:4px; margin-top:-2px;
+  border-radius:2px; background:rgba(244,241,234,.20); transition:.3s var(--ease);
+}
+.vitrine-nav button.is-on::before{ background:var(--hot); }
+.vitrine-nav button.is-on{ background:transparent; }
+.color-dots button{ width:22px; height:22px; }
+.chip{ min-height:40px; display:inline-flex; align-items:center; }
+.btn--tiny{ min-height:40px; }
+.credit-row a{ display:inline-block; padding:6px 2px; }
+
+@media (max-width:720px){
+  /* ③ 光谱：六个物件在窄屏上会严重重叠 → 上下交错排布 */
+  .spectrum-track{ height:330px; }
+  .sp-item{ width:72px; padding:5px 5px 7px; left:calc(8% + var(--x) * 0.84); }
+  .sp-item:nth-child(odd){ top:27%; }
+  .sp-item:nth-child(even){ top:73%; }
+  .sp-shot{ margin-bottom:5px; }
+  .sp-item b{ font-size:10px; line-height:1.3; }
+  .sp-year{ display:none; }
+
+  /* ④ 案例卡：两栏太窄，文字每行只有十来个字 → 单栏 */
+  .case-grid{ grid-template-columns:1fr; gap:26px; }
+  .case-frame{ max-height:44vh; }
+  .case-frame img{ object-fit:contain; background:var(--ink-2); }
+
+  /* ⑤ 图注和正文的字号在手机上偏小 */
+  .fig figcaption, .case-text, .dg figcaption{ font-size:14px; line-height:1.85; }
+}
+
+/* ⑥ 技术图解：SVG 里的字是为 900px 宽画的，压到手机宽度会变成 6px
+      → 保持最小宽度并允许横向滑动 */
+.dg-frame{ position:relative; overflow:hidden; }
+.dg-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+@media (max-width:900px){
+  .dg-scroll svg{ min-width:760px; }
+  .dg::before{
+    content:"← 左右滑动看图 →"; display:block; margin-bottom:10px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.14em; color:var(--faint);
+  }
+  /* 右边缘常驻渐隐：不管滚到哪，都提示"右边还有" */
+  .dg-frame::after{
+    content:""; position:absolute; top:0; right:0; bottom:0; width:52px; pointer-events:none;
+    background:linear-gradient(270deg, rgba(11,11,12,.88), rgba(11,11,12,0));
+  }
+}
+
+/* ═══ 手机端专项 · 第二轮 ═══ */
+
+/* ⑦ 顶栏在窄屏必须留得住：缩小间距与字号，而不是砍掉功能 */
+@media (max-width:560px){
+  .topbar{ padding:12px 12px; gap:8px; }
+  .brand{ font-size:12px; gap:7px; padding:0; }
+  .brand-mark{ width:14px; height:14px; }
+  .topbar-right{ gap:7px; }
+  .nav-link{ padding:7px 11px; font-size:11.5px; }
+  .nav-arrow{ width:38px; height:38px; font-size:15px; }
+  .dots{ display:none; }
+}
+
+/* ⑧ 橱窗切换条：视觉仍是细条，但触控区要有 44px */
+.vitrine-nav button{ height:44px; width:30px; }
+.vitrine-nav button.is-on{ width:46px; }
+
+/* ⑨ 署名里的「来源」链接给足触控高度 */
+.credit-row a{ padding:10px 6px; }
+
+/* ⑩ 根因修复：grid/flex 子项默认 min-width:auto，会被内部可滚动内容撑宽。
+      图解要横向滑动，就必须显式把父级收住。 */
+.dg-list{ grid-template-columns:minmax(0,1fr); }
+.dg{ min-width:0; }
+
+/* ⑪ 顶栏品牌与画板工具：补足触控高度 */
+.brand{ min-height:44px; display:flex; align-items:center; }
+.tool{ min-height:40px; display:inline-flex; align-items:center; }
+.tool--danger, #saveCanvas{ min-height:40px; }
+
+/* ⑫ 光谱滑块：视觉仍是 4px 细条，但触控区 44px */
+input[type=range]{
+  height:44px; border-radius:0; background-color:transparent;
+  background-repeat:no-repeat; background-position:center; background-size:100% 4px;
+}
+
+/* ⑬ 触控目标收尾 */
+.vitrine-nav button{ width:38px; }
+.vitrine-nav button.is-on{ width:54px; }
+.color-dots{ gap:6px; }
+.color-dots button{ width:34px; height:34px; }
+.color-dots button.is-active,
+.color-dots button:hover{ transform:none; box-shadow:0 0 0 2px var(--ink), 0 0 0 4px var(--paper); }

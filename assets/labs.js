@@ -69,7 +69,7 @@
       let best = 0, bd = 1e9;
       nodes.forEach((n, i) => { const d = Math.abs(+n.dataset.x - v); if (d < bd) { bd = d; best = i; } });
       nodes.forEach((n, i) => n.classList.toggle('is-near', i === best && bd < 14));
-      slider.style.background =
+      slider.style.backgroundImage =
         `linear-gradient(90deg,${MINT} 0%,rgba(244,241,234,.22) ${v}%,rgba(244,241,234,.22) ${v}%,${HOT} 100%)`;
     };
     slider.addEventListener('input', sync);
