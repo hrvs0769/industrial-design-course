@@ -13,183 +13,385 @@
   const iso = (x, y, z) => [(x - y) * C30, (x + y) * S30 - z];
 
   /* ═══════════════════════════════════════════════════
-     ① 注塑实验室 —— 三条工艺定律，做坏不用赔钱
+     ① 开模实验室 —— 你自己塑形，然后让它活下来
+
+     旧版的问题：给三个滑块调参，按下按钮拿一个"合格/不合格"的文字判定。
+     学生学到的是查表（0.6° → 拉伤），不是理解。
+
+     新版做三件事：
+       · 视图改成「侧剖」—— 拔模角和壁厚只在剖面里看得见，
+         等轴测视图恰恰让这两个概念隐形
+       · 学生直接拖几何体上的手柄，不拖滑块 ——
+         操作和后果在空间上连在一起
+       · 干涉是「算」出来的：把剖面当折线，逐段求 dx/dy。
+         向上顶出 δ，若某段 dx/dy < 0，则该段必然嵌入钢模。
+         这不是查表，是几何本身。
      ═══════════════════════════════════════════════════ */
   function moldingLab(root) {
-    const P = { wall: 1.6, draft: 1.0, r: 1.0 };   // 当前参数
-    const LIM = {                  // 教科书给的合理区间
-      wall:  [0.6, 4.0],
-      draft: [0, 4],
-      r:     [0, 4]
+    const S = 7;                       // px per mm
+    const CX = 280;                    // 中轴
+    const YB = 300;                    // 零件底面（外侧）
+    const STEEL = 9;                   // 钢模壁厚 mm
+    const BASE = 6;                    // 模底厚 mm
+    const H = 26;                      // 件高 mm
+
+    // 可调几何
+    const G = {
+      Wb: 20,      // 底部外侧半宽 mm
+      wall: 1.6,   // 壁厚 mm
+      draft: 1.0,  // 拔模角（度），负值 = 倒扣
+      r: 1.2,      // 底角半径 mm
+      bottom: 2.4  // 底厚 mm
     };
-    const GOOD = { wall: [1.2, 3.0], draft: [1.0, 4], r: [0.8, 4] };
+    const GOOD = { wall: [1.2, 3.0], draft: [1.0, 6], r: [0.8, 4] };
+    const LIM  = { wall: [0.6, 4.0], draft: [-3, 6],  r: [0, 4] };
 
-    // 视框按零件的实际包围盒收紧（否则零件在舞台里只有一小块）
-    const W = 178, H = 156;
+    const px = mm => mm * S;
+    const yOf = up => YB - px(up);                 // 以 mm 计的"离底高度" → svg y
 
-    function verdict() {
-      const bad = [];
-      if (P.wall < GOOD.wall[0])       bad.push({ k: 'short', 名: '短射',  因: '壁太薄，塑料还没流到边角就冷却了' });
-      else if (P.wall > GOOD.wall[1])  bad.push({ k: 'sink',  名: '缩水',  因: '壁太厚，肉厚处冷得慢，表面塌下去一块' });
-      if (P.draft < GOOD.draft[0])     bad.push({ k: 'drag',  名: '拉伤',  因: '拔模角不够，零件被硬拽出来，侧面被刮花' });
-      if (P.r < GOOD.r[0])             bad.push({ k: 'crack', 名: '应力开裂', 因: '尖角把力全挤在一点，塑料从这里裂开' });
-      return bad;
+    /* ── 几何：把剖面算成精确的点 ─────────────────── */
+    function geom() {
+      const tan = Math.tan(G.draft * Math.PI / 180);
+      const Wt  = G.Wb + tan * H;                  // 顶部外侧半宽
+      const Wi  = G.Wb - G.wall;                   // 底部内侧半宽
+      const Wti = Wt - G.wall;                     // 顶部内侧半宽
+      const r   = Math.min(G.r, G.wall * .9, G.Wb * .4);
+      const bt  = Math.min(G.bottom, H * .6);
+      return { Wt, Wi, Wti, tan, r, bt };
     }
 
-    // 画零件
-    function part(bad, t) {
-      const w = P.wall, d = P.draft * 0.9, r = Math.min(P.r, 3.4) * 1.1;
-      const L = 62, D = 44, Hh = 30;
-      const taper = d;                                  // 顶部外扩量
-      const th = clamp(w * 3.2, 3.5, 13);               // 视觉厚度
+    /* ── 干涉分析：逐段求斜率，算真实接触 ───────────
+       顶出方向 +y（向上）。外侧壁从底到顶横向变化 dW：
+         dW > 0  → 向外张开，能滑出
+         dW ≈ 0  → 直壁，整面贴合，硬拽
+         dW < 0  → 倒扣，嵌入钢模，出不来                     */
+    function analyse() {
+      const g = geom();
+      const slope = (g.Wt - G.Wb) / H;             // dx/dy
+      const out = { slope, issues: [], contact: 0 };
 
-      // 外面四个角（等轴测），带拔模外扩
-      const o = [
-        iso(0, 0, 0), iso(L, 0, 0), iso(L, D, 0), iso(0, D, 0)
-      ];
-      const oTop = [
-        iso(-taper, -taper, Hh), iso(L + taper, -taper, Hh),
-        iso(L + taper, D + taper, Hh), iso(-taper, D + taper, Hh)
-      ];
-      // 内腔
-      const i0 = iso(th, th, th), i1 = iso(L - th, th, th),
-            i2 = iso(L - th, D - th, th), i3 = iso(th, D - th, th);
-      const iTop = [
-        iso(th - taper, th - taper, Hh), iso(L - th + taper, th - taper, Hh),
-        iso(L - th + taper, D - th + taper, Hh), iso(th - taper, D - th + taper, Hh)
-      ];
-      const P0 = p => p.map(v => v.map(n => n.toFixed(1)).join(',')).join(' ');
-      // 零件在等轴测坐标里的中心大约在 (8, 12)，据此把它摆到视框正中
-      const ox = W / 2 - 8, oy = H / 2 - 10;
-      const g = s => `<g transform="translate(${ox},${oy})">${s}</g>`;
-
-      const FILL = '#2A4D8F', FILL2 = '#1F3A6D', EDGE = '#6FB4FF';
-      let s = '';
-
-      // 外壳两个可见侧面
-      s += `<polygon points="${P0([o[0], o[1], oTop[1], oTop[0]])}" fill="${FILL2}" stroke="${EDGE}" stroke-width="1.4"/>`;
-      s += `<polygon points="${P0([o[1], o[2], oTop[2], oTop[1]])}" fill="${FILL}" stroke="${EDGE}" stroke-width="1.4"/>`;
-      // 顶面环（壁厚）
-      s += `<polygon points="${P0([oTop[0], oTop[1], oTop[2], oTop[3]])}" fill="#3D6BC4" stroke="${EDGE}" stroke-width="1.4"/>`;
-      s += `<polygon points="${P0([iTop[0], iTop[1], iTop[2], iTop[3]])}" fill="#0C1424" stroke="rgba(111,180,255,.5)" stroke-width="1"/>`;
-      // 内壁
-      s += `<polygon points="${P0([i0, i1, iTop[1], iTop[0]])}" fill="#16223A"/>`;
-      s += `<polygon points="${P0([i1, i2, iTop[2], iTop[1]])}" fill="#101A2C"/>`;
-
-      /* ── 缺陷 ── */
-      const has = k => bad.some(b => b.k === k);
-
-      // 短射：料没流满，边角留出未填充区
-      if (has('short')) {
-        s += `<polygon points="${P0([o[1], o[2], oTop[2], oTop[1]])}" fill="#0B0B0C" opacity=".72"/>`;
-        s += `<path d="${(() => {
-          const a = iso(L * .52, 0, Hh), b = iso(L, D * .44, Hh), c = iso(L * .78, D, 0);
-          return `M${a[0]},${a[1]} L${b[0]},${b[1]} L${c[0]},${c[1]}`;
-        })()}" stroke="#FF5A1F" stroke-width="2.5" stroke-dasharray="6 5" fill="none"/>`;
+      if (slope < -0.006) {
+        // 倒扣：真实嵌入深度 = |slope| × 件高
+        out.issues.push({
+          k: 'lock', 名: '倒扣',
+          值: (-slope * H).toFixed(1) + ' mm',
+          因为: `顶比底窄了 ${(-slope * H).toFixed(1)} 毫米。零件被钢模咬住，往哪个方向都出不来 —— 这不是"难顶"，是<strong>物理上不可能</strong>。真实世界里只有两条路：改形状，或者加一套侧向滑块，模具费翻倍。`
+        });
+        out.contact = H;                            // 全高咬合
+      } else if (slope < Math.tan(GOOD.draft[0] * Math.PI / 180)) {
+        out.issues.push({
+          k: 'drag', 名: '拉伤',
+          值: (Math.atan(Math.abs(slope)) * 180 / Math.PI).toFixed(1) + '°',
+          因为: `壁几乎是直的（${(Math.atan(Math.abs(slope)) * 180 / Math.PI).toFixed(1)}°）。直壁意味着零件<b>整个 ${H} 毫米高度都贴着钢模</b>，顶出来要硬拽，表面会被刮花。要滑顺，只需要 1° —— 在 ${H} 毫米的高度上，那只有 <b>${(Math.tan(Math.PI / 180) * H).toFixed(1)} 毫米</b>的斜度。`
+        });
+        out.contact = H * .8;
       }
-      // 缩水：厚壁表面凹一块
-      if (has('sink')) {
-        const c = iso(L * .62, D, Hh * .45);
-        s += `<ellipse cx="${c[0]}" cy="${c[1] + 4}" rx="${18 + th}" ry="${9 + th * .4}" fill="#0A0F1A" opacity=".8"/>`;
-        s += `<ellipse cx="${c[0]}" cy="${c[1] + 4}" rx="${18 + th}" ry="${9 + th * .4}" fill="none" stroke="#FF5A1F" stroke-width="2"/>`;
-      }
-      // 拉伤：侧壁竖向刮痕
-      if (has('drag')) {
-        for (let i = 0; i < 7; i++) {
-          const x = 14 + i * 17;
-          const a = iso(x, D, Hh * .1), b = iso(x, D, Hh * .92);
-          s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="#FF5A1F" stroke-width="1.8" opacity=".85"/>`;
-        }
-      }
-      // 开裂：从尖角放射
-      if (has('crack')) {
-        const c = iso(L, 0, Hh * .5);
-        for (let i = 0; i < 4; i++) {
-          const a = (i - 1.5) * .5;
-          s += `<line x1="${c[0]}" y1="${c[1]}" x2="${c[0] + Math.cos(a) * 34}" y2="${c[1] + Math.sin(a) * 34 + 10}"
-                  stroke="#FF5A1F" stroke-width="2.2" stroke-linecap="round"/>`;
-        }
-      }
-      // 合格：高光
-      if (!bad.length) {
-        const c = iso(L * .55, 0, Hh);
-        s += `<ellipse cx="${c[0]}" cy="${c[1] + 6}" rx="34" ry="12" fill="#6EE7D7" opacity=".18"/>`;
-      }
-      return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="注塑零件模拟">${g(s)}</svg>`;
-    }
 
-    function render(state) {
-      const bad = verdict();
-      // 尺寸读数
-      $$('[data-read]', root).forEach(el => {
-        const k = el.dataset.read;
-        const v = P[k];
-        el.textContent = k === 'draft' ? v.toFixed(1) + '°' : v.toFixed(1) + ' mm';
+      if (G.wall < GOOD.wall[0]) out.issues.push({
+        k: 'short', 名: '短射', 值: G.wall.toFixed(1) + ' mm',
+        因为: `${G.wall.toFixed(1)} 毫米的壁太薄了。塑料在模具里是<b>边流边冷</b>的 —— 还没流到边角就冻住了，零件缺一块。薄壁需要更高的注射压力和更快的速度，普通机器做不到。`
       });
-      // 参数条：标出合理区间
+      else if (G.wall > GOOD.wall[1]) out.issues.push({
+        k: 'sink', 名: '缩水', 值: G.wall.toFixed(1) + ' mm',
+        因为: `${G.wall.toFixed(1)} 毫米的肉太厚。厚的地方冷得慢，塑料收缩时表面已经被冻住了、里面还在缩 —— <b>表面就被拽下去一块</b>。真正的解法不是加厚，是加一道加强筋。`
+      });
+
+      if (G.r < GOOD.r[0]) out.issues.push({
+        k: 'crack', 名: '应力开裂', 值: G.r.toFixed(1) + ' mm',
+        因为: `转角只有 ${G.r.toFixed(1)} 毫米。尖锐的内角会把应力集中到<b>几十倍</b> —— 零件在顶出、装配或者只是放久了之后，就从这里裂开。`
+      });
+      return out;
+    }
+
+    /* ── 画 ──────────────────────────────────────── */
+    const W = 560, Hv = 430;
+    const p2 = (x, y) => `${x.toFixed(1)},${y.toFixed(1)}`;
+
+    function steel() {
+      const g = geom();
+      const outerHalf = px(G.Wb + STEEL);
+      const topLo = yOf(0) - px(BASE) - 46;        // 钢模上缘（留出顶出空间）
+      const botY  = yOf(0) + px(BASE);
+      // 模腔：与零件外表面完全一致（模具就是照零件挖出来的）
+      const cavTopR = CX + px(g.Wt), cavTopL = CX - px(g.Wt);
+      const cavBotR = CX + px(G.Wb), cavBotL = CX - px(G.Wb);
+      return `
+        <defs>
+          <pattern id="hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(150,160,180,.30)" stroke-width="1.2"/>
+          </pattern>
+        </defs>
+        <g class="md-steel">
+          <!-- 左钢模 -->
+          <path d="M${p2(CX - outerHalf, topLo)} L${p2(cavTopL, topLo)} L${p2(cavBotL, YB)} L${p2(CX - outerHalf, YB)} Z"
+                fill="#20232B" stroke="rgba(150,160,180,.55)" stroke-width="1.4"/>
+          <path d="M${p2(CX - outerHalf, topLo)} L${p2(cavTopL, topLo)} L${p2(cavBotL, YB)} L${p2(CX - outerHalf, YB)} Z" fill="url(#hatch)"/>
+          <!-- 右钢模 -->
+          <path d="M${p2(cavTopR, topLo)} L${p2(CX + outerHalf, topLo)} L${p2(CX + outerHalf, YB)} L${p2(cavBotR, YB)} Z"
+                fill="#20232B" stroke="rgba(150,160,180,.55)" stroke-width="1.4"/>
+          <path d="M${p2(cavTopR, topLo)} L${p2(CX + outerHalf, topLo)} L${p2(CX + outerHalf, YB)} L${p2(cavBotR, YB)} Z" fill="url(#hatch)"/>
+          <!-- 模底 -->
+          <rect x="${CX - outerHalf}" y="${YB}" width="${outerHalf * 2}" height="${px(BASE)}"
+                fill="#20232B" stroke="rgba(150,160,180,.55)" stroke-width="1.4"/>
+          <rect x="${CX - outerHalf}" y="${YB}" width="${outerHalf * 2}" height="${px(BASE)}" fill="url(#hatch)"/>
+          <!-- 顶出方向 -->
+          <g opacity=".7">
+            <line x1="${CX}" y1="${topLo - 34}" x2="${CX}" y2="${topLo - 8}" stroke="#FF5A1F" stroke-width="2"/>
+            <path d="M${CX} ${topLo - 42} l-5 10 h10 z" fill="#FF5A1F"/>
+            <text x="${CX + 12}" y="${topLo - 26}" fill="#FF5A1F" font-size="11.5"
+                  font-family="system-ui" letter-spacing=".1em">顶出方向</text>
+          </g>
+        </g>`;
+    }
+
+    function plastic(heat) {
+      const g = geom();
+      const yTop = yOf(H), yIn = yOf(g.bt);
+      const oR = CX + px(g.Wt), oL = CX - px(g.Wt);
+      const iR = CX + px(g.Wti), iL = CX - px(g.Wti);
+      const bR = CX + px(G.Wb), bL = CX - px(G.Wb);
+      const cR = CX + px(g.Wi), cL = CX - px(g.Wi);
+      const rp = px(g.r), rb = px(Math.min(g.r, g.bt));
+
+      // 外轮廓 + 内轮廓（一只杯子的剖面，中间是塑料）
+      const d = [
+        `M${p2(bL + rp, YB)}`,
+        `L${p2(bR - rp, YB)}`,
+        `Q${p2(bR, YB)} ${p2(bR, YB - rp)}`,
+        `L${p2(oR, yTop)}`,
+        `L${p2(iR, yTop)}`,                                   // 顶部端面
+        `L${p2(CX + px(g.Wti), yTop - 0)}`,
+        `L${p2(cR, yIn + rb)}`,
+        `Q${p2(cR, yIn)} ${p2(cR - rb, yIn)}`,
+        `L${p2(cL + rb, yIn)}`,
+        `Q${p2(cL, yIn)} ${p2(cL, yIn + rb)}`,
+        `L${p2(iL, yTop)}`,
+        `L${p2(oL, yTop)}`,
+        `L${p2(bL, YB - rp)}`,
+        `Q${p2(bL, YB)} ${p2(bL + rp, YB)}`,
+        'Z'
+      ].join(' ');
+
+      // 冷却：肉厚处先红后塌
+      const heatFill = heat != null
+        ? `url(#heatGrad)`
+        : 'url(#plasticGrad)';
+      let extra = '';
+      if (heat != null && heat > .35 && G.wall > GOOD.wall[1] - .6) {
+        const sy = yOf(H * .45), sx = CX + px(g.Wt * .42);
+        extra = `<ellipse cx="${sx}" cy="${sy}" rx="${px(G.wall * 1.9)}" ry="${px(3.4)}"
+                   fill="#0A0F1A" opacity="${(heat * .8).toFixed(2)}"/>`;
+      }
+      return `
+        <defs>
+          <linearGradient id="plasticGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#2A4D8F"/><stop offset=".5" stop-color="#4E86E0"/>
+            <stop offset="1" stop-color="#2A4D8F"/>
+          </linearGradient>
+          <linearGradient id="heatGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#F5B841"/><stop offset=".55" stop-color="#E8613C"/>
+            <stop offset="1" stop-color="#4E86E0"/>
+          </linearGradient>
+        </defs>
+        <path d="${d}" fill="${heatFill}" stroke="#8FC2FF" stroke-width="1.6" stroke-linejoin="round"/>
+        ${extra}`;
+    }
+
+    function handles() {
+      const g = geom();
+      const yTop = yOf(H);
+      const yMid = yOf(H * .5);
+      const oR = CX + px(g.Wt), iR = CX + px(g.Wti);
+      const bR = CX + px(G.Wb);
+      const H1 = (x, y, k, 名) => `
+        <g class="md-handle" data-h="${k}" style="cursor:grab">
+          <circle cx="${x}" cy="${y}" r="16" fill="transparent"/>
+          <circle cx="${x}" cy="${y}" r="8" fill="#F4F1EA" stroke="#0B0B0C" stroke-width="2.5"/>
+          <circle cx="${x}" cy="${y}" r="3" fill="#FF5A1F"/>
+          <title>${名}</title>
+        </g>`;
+      return `
+        ${H1(oR, yTop - 4, 'draft', '拖动改变拔模角（向左拖过头会变成倒扣）')}
+        ${H1(iR - 2, yMid, 'wall', '拖动改变壁厚')}
+        ${H1(bR - px(g.r) * .3, YB - px(g.r) * .3, 'r', '拖动改变底角圆角')}`;
+    }
+
+    /* ── 渲染 ────────────────────────────────────── */
+    let phase = 'idle';   // idle | ejecting | cooling | done
+    let ejectY = 0, heat = null, jammed = false;
+
+    function draw() {
+      const a = analyse();
+      const I = $('[data-moldsvg]', root);
+      I.innerHTML = `
+        ${steel()}
+        <g data-ejectg transform="translate(0,${-ejectY})">${plastic(heat)}</g>
+        ${phase === 'idle' ? handles() : ''}
+        ${phase !== 'idle' && a.issues.some(i => i.k === 'lock' || i.k === 'drag') ? jamMarks(a) : ''}`;
+
+      // 读数
+      const dEl = $('[data-read="draft"]', root);
+      if (dEl) dEl.textContent = G.draft.toFixed(1) + '°';
+      const wEl = $('[data-read="wall"]', root);
+      if (wEl) wEl.textContent = G.wall.toFixed(1) + ' mm';
+      const rEl = $('[data-read="r"]', root);
+      if (rEl) rEl.textContent = G.r.toFixed(1) + ' mm';
+
+      // 参数条
       $$('[data-range]', root).forEach(el => {
         const k = el.dataset.range;
         const [lo, hi] = LIM[k], [g1, g2] = GOOD[k];
         const pct = v => ((v - lo) / (hi - lo)) * 100;
-        $('.pl-good', el).style.left = pct(g1) + '%';
-        $('.pl-good', el).style.width = (pct(g2) - pct(g1)) + '%';
-        $('.pl-knob', el).style.left = pct(P[k]) + '%';
+        const gd = $('.pl-good', el);
+        if (gd) { gd.style.left = Math.max(0, pct(g1)) + '%'; gd.style.width = (pct(g2) - Math.max(0, pct(g1))) + '%'; }
       });
-      $('[data-part]', root).innerHTML = part(state && state.show ? bad : []);
-      // 只在「开模」之后显示结论；拖动时只显示形状
+
+      // 缺陷灯
+      $$('[data-flag]', root).forEach(el => {
+        const on = phase !== 'idle' && a.issues.some(i => i.k === el.dataset.flag);
+        el.classList.toggle('is-on', on);
+      });
+
+      // 结论
       const v = $('[data-verdict]', root);
-      if (!state || !state.show) {
+      if (phase === 'idle') {
         v.className = 'pl-verdict is-idle';
-        v.innerHTML = '<b>调好参数，按下「开模」。</b>做坏了不用赔钱 —— 这是这门课最便宜的地方。';
-      } else if (!bad.length) {
+        v.innerHTML = '<b>拖动图上的三个白点：</b>上面的改拔模角、中间改壁厚、下面改圆角。做好了按「顶出」。<br><span style="opacity:.75">做坏了不用赔钱 —— 这是这门课最便宜的地方。</span>';
+      } else if (!a.issues.length) {
         v.className = 'pl-verdict is-ok';
-        v.innerHTML = `<b>✓ 合格件。</b>壁厚 ${P.wall.toFixed(1)} mm、拔模角 ${P.draft.toFixed(1)}°、圆角 ${P.r.toFixed(1)} mm —— 这三项都落在可成型的区间里。成型周期约 <b>${(18 + P.wall * 9).toFixed(0)} 秒</b>。`;
+        v.innerHTML = `<b>✓ 顺利顶出。</b>拔模角 ${G.draft.toFixed(1)}°、壁厚 ${G.wall.toFixed(1)} mm、圆角 ${G.r.toFixed(1)} mm —— 这三项都过了。<br>成型周期约 <b>${(16 + G.wall * 9).toFixed(0)} 秒</b>。记住这个手感：<b>让它好做，形状得让一步。</b>`;
       } else {
         v.className = 'pl-verdict is-bad';
-        v.innerHTML = bad.map(b => `<div class="pl-defect"><span>${b.名}</span>${b.因}</div>`).join('');
+        v.innerHTML = a.issues.map(i => `
+          <div class="pl-defect"><span>${i.名}${i.值 ? ' · ' + i.值 : ''}</span>
+          <em>${i.因为}</em></div>`).join('');
       }
-      // 缺陷标签
-      $$('[data-flag]', root).forEach(el => {
-        const on = bad.some(b => b.k === el.dataset.flag) && state && state.show;
-        el.classList.toggle('is-on', !!on);
-      });
     }
 
-    // 绑定滑块
-    $$('input[type=range]', root).forEach(inp => {
-      inp.addEventListener('input', () => {
-        P[inp.dataset.k] = +inp.value;
-        render({ show: false });
-      });
-    });
+    function jamMarks(a) {
+      const g = geom();
+      const lock = a.issues.some(i => i.k === 'lock');
+      const col = lock ? '#FF3B1F' : '#F5B841';
+      const yTop = yOf(H), yBot = yOf(0);
+      const n = 9;
+      let s = '';
+      for (let i = 0; i < n; i++) {
+        const y = yBot + (yTop - yBot) * (i / (n - 1));
+        const t = i / (n - 1);
+        // 干涉点沿壁分布：倒扣是全高，拉伤集中在下半段
+        const on = lock || t < .62 ? 1 : 0;
+        if (!on) continue;
+        const xR = CX + px(G.Wb + (g.Wt - G.Wb) * t);
+        s += `<line x1="${xR - 16}" y1="${y}" x2="${xR + 16}" y2="${y}"
+                stroke="${col}" stroke-width="2.4" stroke-linecap="round" opacity=".95"/>
+              <line x1="${2 * CX - xR - 16}" y1="${y}" x2="${2 * CX - xR + 16}" y2="${y}"
+                stroke="${col}" stroke-width="2.4" stroke-linecap="round" opacity=".95"/>`;
+      }
+      return `<g class="md-jam">${s}</g>`;
+    }
 
-    // 开模：先合模 → 填充 → 顶出 → 结论
+    /* ── 拖拽 ────────────────────────────────────── */
+    function toMm(evt) {
+      const svg = $('[data-moldsvg]', root);
+      const r = svg.getBoundingClientRect();
+      return ((evt.clientX - r.left) / r.width) * W;
+    }
+    let drag = null;
+
+    root.addEventListener('pointerdown', e => {
+      const h = e.target.closest('.md-handle');
+      if (!h || phase !== 'idle') return;
+      drag = h.dataset.h;
+      h.style.cursor = 'grabbing';
+      try { root.setPointerCapture && root.setPointerCapture(e.pointerId); } catch (err) {}
+      e.preventDefault();
+    });
+    root.addEventListener('pointermove', e => {
+      if (!drag) return;
+      const x = toMm(e);
+      if (drag === 'draft') {
+        const want = (x - CX) / S;                       // 顶部外侧半宽 mm
+        const deg = Math.atan2(want - G.Wb, H) * 180 / Math.PI;
+        G.draft = Math.max(LIM.draft[0], Math.min(LIM.draft[1], deg));
+      } else if (drag === 'wall') {
+        // 手柄在内壁的腰部：先算出该高度的外壁位置，再反推壁厚
+        const tan = Math.tan(G.draft * Math.PI / 180);
+        const outerMid = G.Wb + tan * H * 0.5;
+        G.wall = Math.max(LIM.wall[0], Math.min(LIM.wall[1], outerMid - (x - CX) / S));
+      } else if (drag === 'r') {
+        G.r = Math.max(LIM.r[0], Math.min(LIM.r[1], ((CX + px(G.Wb)) - x) / S + G.r));
+      }
+      draw();
+      e.preventDefault();
+    });
+    const end = () => { drag = null; };
+    root.addEventListener('pointerup', end);
+    root.addEventListener('pointercancel', end);
+    root.addEventListener('pointerleave', end);
+
+    /* ── 顶出：真的把它推出去 ─────────────────────── */
     const btn = $('[data-mold]', root);
     btn.addEventListener('click', () => {
-      if (btn.disabled) return;
-      btn.disabled = true;
+      if (phase === 'ejecting' || phase === 'cooling') return;
+      const a = analyse();
+      const lock = a.issues.some(i => i.k === 'lock');
       const stage = $('[data-stage]', root);
-      const seq = ['合模', '填充', '冷却', '顶出'];
-      let i = 0;
-      stage.classList.add('is-run');
-      const tick = setInterval(() => {
-        stage.textContent = seq[i] || '';
-        stage.dataset.i = i;
-        i++;
-        if (i > seq.length) {
-          clearInterval(tick);
-          stage.textContent = '';
-          stage.classList.remove('is-run');
-          btn.disabled = false;
-          render({ show: true });
-          const bad = verdict();
-          root.dispatchEvent(new CustomEvent('molded', { detail: { bad } }));
+      const wrap = $('.sim-stage', root);
+      wrap && wrap.classList.add('is-run');
+
+      phase = 'ejecting'; jammed = lock;
+      const t0 = performance.now();
+      const DUR = 900, MAX = lock ? 6 : px(H * .82);
+
+      (function step(t) {
+        const k = Math.min(1, (t - t0) / DUR);
+        const e = 1 - Math.pow(1 - k, 3);
+        ejectY = MAX * (lock ? Math.min(e * 4, 1) * .18 : e);
+        if (stage) stage.textContent = lock ? '卡死' : '顶出中';
+        draw();
+        if (k < 1) requestAnimationFrame(step);
+        else {
+          if (lock) {
+            // 卡死：抖一下，退回去
+            let n = 0;
+            const shake = setInterval(() => {
+              ejectY = (n % 2 ? 2 : -1);
+              draw(); n++;
+              if (n > 7) { clearInterval(shake); after(); }
+            }, 60);
+          } else after();
         }
-      }, 420);
+      })(t0);
+
+      function after() {
+        if (stage) stage.textContent = '';
+        wrap && wrap.classList.remove('is-run');
+        // 厚壁 → 冷却阶段
+        if (G.wall > GOOD.wall[1] - .7) {
+          phase = 'cooling';
+          const c0 = performance.now();
+          (function cool(t) {
+            const k = Math.min(1, (t - c0) / 1100);
+            heat = k;
+            if (stage) stage.textContent = '冷却';
+            draw();
+            if (k < 1) requestAnimationFrame(cool);
+            else { heat = null; phase = 'done'; if (stage) stage.textContent = ''; draw(); }
+          })(c0);
+        } else { phase = 'done'; draw(); }
+      }
     });
 
-    render({ show: false });
-    return { P, verdict, render };
+    // 复位
+    const rst = $('[data-moldreset]', root);
+    if (rst) rst.addEventListener('click', () => {
+      phase = 'idle'; ejectY = 0; heat = null; jammed = false;
+      const st = $('[data-stage]', root); if (st) st.textContent = '';
+      draw();
+    });
+
+    draw();
+    return { G, analyse, draw };
   }
 
   /* ═══════════════════════════════════════════════════

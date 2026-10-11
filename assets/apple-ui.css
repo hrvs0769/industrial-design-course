@@ -592,3 +592,43 @@ h1, h2, h3, .sec-title, .hero-title, .end-title, .closing-big,
   font-size:var(--fs-meta) !important;
   letter-spacing:.08em !important;
 }
+
+/* ═══ 开模实验室（侧剖视图 + 直接拖几何体）═══ */
+.md-svg{ width:100%; height:auto; display:block; touch-action:none; }
+.sim-stage:has(.md-svg){ aspect-ratio:auto; padding:26px 14px 10px; }
+.md-handle{ transition:transform .2s var(--e-apple); transform-box:fill-box; transform-origin:center; }
+.md-handle:hover{ transform:scale(1.28); }
+.md-handle:active{ cursor:grabbing; }
+.md-jam{ animation:jamPulse .5s var(--e-apple) 2; }
+@keyframes jamPulse{ 50%{ opacity:.35 } }
+.md-actions{ display:flex; gap:10px; margin-bottom:4px; }
+.md-actions .btn{ flex:1; }
+.md-actions .btn--ghost{ flex:0 0 34%; }
+
+/* 结论里的成因说明 */
+.pl-defect{ display:grid; grid-template-columns:auto 1fr; gap:11px; padding:8px 0; align-items:start; }
+.pl-defect + .pl-defect{ border-top:1px solid rgba(255,90,31,.16); }
+.pl-defect span{
+  flex:0 0 auto; font-weight:700; color:var(--hot);
+  font-family:var(--mono); font-size:11.5px; letter-spacing:.08em;
+  padding:4px 9px; border-radius:999px; background:rgba(255,90,31,.16);
+  white-space:nowrap; margin-top:2px;
+}
+.pl-defect em{ font-style:normal; line-height:1.82; color:#FFD3C2; }
+.pl-defect em b{ color:var(--paper); font-weight:700; }
+
+/* 开模实验室：画幅占主导，右侧只放读数与结论 */
+.sim-grid--mold{ grid-template-columns:minmax(0,1.42fr) minmax(0,1fr) !important; }
+@media (max-width:980px){ .sim-grid--mold{ grid-template-columns:minmax(0,1fr) !important; } }
+.sim-stage:has(.md-svg){ aspect-ratio:auto !important; padding:30px 18px 16px !important; }
+.md-svg{ max-height:none; }
+.md-side{ display:flex; flex-direction:column; }
+.md-reads{ display:grid; gap:1px; margin-bottom:22px; border-radius:var(--r-md); overflow:hidden;
+  border:1px solid rgba(244,241,234,.1); background:rgba(244,241,234,.045); }
+.md-reads > div{ display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:10px;
+  padding:14px 17px; border-bottom:1px solid rgba(244,241,234,.07); }
+.md-reads > div:last-child{ border-bottom:none; }
+.md-reads span{ font-size:13.5px; color:var(--muted); }
+.md-reads b{ font-family:var(--mono); font-size:19px; font-weight:600; font-variant-numeric:tabular-nums;
+  text-align:right; letter-spacing:-.01em; }
+.md-reads em{ grid-column:2; font-style:normal; font-size:12px; color:var(--faint); text-align:right; }

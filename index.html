@@ -60,8 +60,8 @@
       <p class="kicker reveal">先玩一个 · 不用赔钱</p>
       <h2 class="sec-title reveal">你来开一次模。</h2>
       <p class="lead narrow reveal">
-        下面这台机器真的会失败。三个参数互相打架 —— 壁厚了会缩水，薄了会短射；
-        拔模角不够，零件会被硬拽出来刮花。调好，按「开模」。
+        下面是一副<em>真正会拒绝你</em>的模具。你不用调参数 —— 直接拖图上的三个白点，
+        改变零件的形状。然后按「顶出」，看它能不能从钢模里出来。
       </p>
 
       <div class="sim reveal" data-lab="molding">
@@ -70,53 +70,34 @@
           <span class="sim-tag">第 06 课 · 材料与工艺</span>
         </div>
         <p class="sim-sub">
-          你要做的是一只塑料托盘。工厂只给你一副模具，参数定下去就不能改了 —— 和真实世界一样。
+          这是一只塑料杯的<b>侧剖</b>。拔模角和壁厚只有在剖面里才看得见 —— 换成一幅斜着看的三维图，1° 的斜度连一个像素都不到。
+          直接拖图上的<b>白点</b>改变形状，按「顶出」看钢模接不接受。
         </p>
 
-        <div class="sim-grid">
+        <div class="sim-grid sim-grid--mold">
           <div class="sim-stage" id="moldStage">
-            <span class="stage-label">MOLD SIM</span>
+            <span class="stage-label">侧剖视图 · SECTION</span>
             <span class="stage-state" data-stage></span>
-            <div data-part></div>
+            <svg class="md-svg" data-moldsvg viewBox="0 0 560 430" role="img" aria-label="注塑模具剖面与塑料件"></svg>
           </div>
 
-          <div>
-            <div class="sim-ctl">
-              <div class="sim-ctl-top"><label>壁厚</label><b data-read="wall">1.6 mm</b></div>
-              <div class="sim-range" data-range="wall">
-                <input type="range" data-k="wall" min="0.6" max="4" step="0.1" value="1.6" aria-label="壁厚" />
-                <div class="pl-track"><i class="pl-good"></i></div>
-                <i class="pl-knob"></i>
-              </div>
-              <div class="sim-scale"><span>0.6</span><span>理想 1.2–3.0</span><span>4.0</span></div>
+          <div class="md-side">
+            <div class="md-reads">
+              <div><span>拔模角</span><b data-read="draft">1.0°</b><em>两壁向上张开的斜度</em></div>
+              <div><span>壁厚</span><b data-read="wall">1.6 mm</b><em>塑料肉有多厚</em></div>
+              <div><span>底角圆角</span><b data-read="r">1.2 mm</b><em>转角有多圆</em></div>
             </div>
 
-            <div class="sim-ctl">
-              <div class="sim-ctl-top"><label>拔模角</label><b data-read="draft">1.0°</b></div>
-              <div class="sim-range" data-range="draft">
-                <input type="range" data-k="draft" min="0" max="4" step="0.1" value="1" aria-label="拔模角" />
-                <div class="pl-track"><i class="pl-good"></i></div>
-                <i class="pl-knob"></i>
-              </div>
-              <div class="sim-scale"><span>0°</span><span>最少 1.0°</span><span>4°</span></div>
+            <div class="md-actions">
+              <button class="btn btn--primary" data-mold type="button">顶出</button>
+              <button class="btn btn--ghost" data-moldreset type="button">重来</button>
             </div>
-
-            <div class="sim-ctl">
-              <div class="sim-ctl-top"><label>圆角</label><b data-read="r">1.0 mm</b></div>
-              <div class="sim-range" data-range="r">
-                <input type="range" data-k="r" min="0" max="4" step="0.1" value="1" aria-label="圆角" />
-                <div class="pl-track"><i class="pl-good"></i></div>
-                <i class="pl-knob"></i>
-              </div>
-              <div class="sim-scale"><span>0</span><span>最少 0.8</span><span>4</span></div>
-            </div>
-
-            <button class="btn btn--primary" data-mold type="button" style="width:100%">开模</button>
 
             <div class="pl-flags">
+              <span class="pl-flag" data-flag="lock">倒扣</span>
+              <span class="pl-flag" data-flag="drag">拉伤</span>
               <span class="pl-flag" data-flag="short">短射</span>
               <span class="pl-flag" data-flag="sink">缩水</span>
-              <span class="pl-flag" data-flag="drag">拉伤</span>
               <span class="pl-flag" data-flag="crack">应力开裂</span>
             </div>
 
