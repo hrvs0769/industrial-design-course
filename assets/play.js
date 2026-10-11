@@ -43,8 +43,8 @@
       r: 1.2,      // 底角半径 mm
       bottom: 2.4  // 底厚 mm
     };
-    const GOOD = { wall: [1.2, 3.0], draft: [1.0, 6], r: [0.8, 4] };
-    const LIM  = { wall: [0.6, 4.0], draft: [-3, 6],  r: [0, 4] };
+    const GOOD = { wall: [1.2, 3.0], draft: [1.0, 6], r: [0.8, 6], rI: 0.8 };
+    const LIM  = { wall: [0.6, 4.0], draft: [-3, 6],  r: [0, 6] };
 
     const px = mm => mm * S;
     const yOf = up => YB - px(up);                 // 以 mm 计的"离底高度" → svg y
@@ -55,9 +55,14 @@
       const Wt  = G.Wb + tan * H;                  // 顶部外侧半宽
       const Wi  = G.Wb - G.wall;                   // 底部内侧半宽
       const Wti = Wt - G.wall;                     // 顶部内侧半宽
-      const r   = Math.min(G.r, G.wall * .9, G.Wb * .4);
       const bt  = Math.min(G.bottom, H * .6);
-      return { Wt, Wi, Wti, tan, r, bt };
+      // 外圆角：受几何限制但不再"偷偷截断"（读数必须等于实际画出来的）
+      const rO  = Math.max(0, Math.min(G.r, G.Wb * .55, bt * 1.5, H * .34));
+      // 内圆角：等壁厚的必然结果 —— 内圆角 = 外圆角 − 壁厚。
+      // 真实模具里这两个圆角由不同的钢件加工（外=模腔，内=模芯），
+      // 而且决定强度的是内圆角。这条关系本身就是个值得教的设计事实。
+      const rI  = Math.max(0, rO - G.wall);
+      return { Wt, Wi, Wti, tan, bt, rO, rI };
     }
 
     /* ── 干涉分析：逐段求斜率，算真实接触 ───────────
@@ -96,9 +101,14 @@
         因为: `${G.wall.toFixed(1)} 毫米的肉太厚。厚的地方冷得慢，塑料收缩时表面已经被冻住了、里面还在缩 —— <b>表面就被拽下去一块</b>。真正的解法不是加厚，是加一道加强筋。`
       });
 
-      if (G.r < GOOD.r[0]) out.issues.push({
-        k: 'crack', 名: '应力开裂', 值: G.r.toFixed(1) + ' mm',
-        因为: `转角只有 ${G.r.toFixed(1)} 毫米。尖锐的内角会把应力集中到<b>几十倍</b> —— 零件在顶出、装配或者只是放久了之后，就从这里裂开。`
+      const g2 = geom();
+      if (g2.rI < GOOD.rI) out.issues.push({
+        k: 'crack', 名: '应力开裂', 值: '内圆角 ' + g2.rI.toFixed(1) + ' mm',
+        因为: `真正决定强度的是<b>内圆角</b>，而它现在只有 ${g2.rI.toFixed(1)} 毫米。` +
+          (g2.rO > 0.1
+            ? `你的外圆角是 ${g2.rO.toFixed(1)} 毫米 —— 内圆角 = 外圆角 − 壁厚（${G.wall.toFixed(1)}）。<b>壁厚一加，内圆角就变小</b>，这是藏在剖面里的连锁反应。`
+            : `外圆角是尖的，内圆角必然也是尖的。`) +
+          `尖锐的内角会把应力集中到<b>几十倍</b> —— 零件在顶出、装配或者只是放久了之后，就从这里裂开。`
       });
       return out;
     }
@@ -151,7 +161,8 @@
       const iR = CX + px(g.Wti), iL = CX - px(g.Wti);
       const bR = CX + px(G.Wb), bL = CX - px(G.Wb);
       const cR = CX + px(g.Wi), cL = CX - px(g.Wi);
-      const rp = px(g.r), rb = px(Math.min(g.r, g.bt));
+      const rp = px(g.rO);                                        // 外圆角（模腔做出来的）
+      const rb = px(Math.min(g.rI, g.Wi * .5, g.bt * .55));       // 内圆角（模芯做出来的）
 
       // 外轮廓 + 内轮廓（一只杯子的剖面，中间是塑料）
       const d = [
@@ -212,8 +223,8 @@
         </g>`;
       return `
         ${H1(oR, yTop - 4, 'draft', '拖动改变拔模角（向左拖过头会变成倒扣）')}
-        ${H1(iR - 2, yMid, 'wall', '拖动改变壁厚')}
-        ${H1(bR - px(g.r) * .3, YB - px(g.r) * .3, 'r', '拖动改变底角圆角')}`;
+        ${H1(iR, yMid, 'wall', '拖动改变壁厚')}
+        ${H1(bR - px(g.rO) - 10, YB, 'r', '左右拖动改变外圆角（内圆角会跟着变）')}`;
     }
 
     /* ── 渲染 ────────────────────────────────────── */
@@ -234,8 +245,14 @@
       if (dEl) dEl.textContent = G.draft.toFixed(1) + '°';
       const wEl = $('[data-read="wall"]', root);
       if (wEl) wEl.textContent = G.wall.toFixed(1) + ' mm';
+      const g3 = geom();
       const rEl = $('[data-read="r"]', root);
-      if (rEl) rEl.textContent = G.r.toFixed(1) + ' mm';
+      if (rEl) rEl.textContent = g3.rO.toFixed(1) + ' mm';
+      const riEl = $('[data-read="ri"]', root);
+      if (riEl) {
+        riEl.textContent = g3.rI.toFixed(1) + ' mm';
+        riEl.style.color = g3.rI < GOOD.rI ? 'var(--hot)' : '';
+      }
 
       // 参数条
       $$('[data-range]', root).forEach(el => {
@@ -319,7 +336,10 @@
         const outerMid = G.Wb + tan * H * 0.5;
         G.wall = Math.max(LIM.wall[0], Math.min(LIM.wall[1], outerMid - (x - CX) / S));
       } else if (drag === 'r') {
-        G.r = Math.max(LIM.r[0], Math.min(LIM.r[1], ((CX + px(G.Wb)) - x) / S + G.r));
+        // 手柄画在 (外底角x − r·S − 10, 底边)。逆运算必须严格对称，
+        // 否则拖到某个位置不等于某个值（上一版的增量式就有这个毛病）。
+        const cornerX = CX + px(G.Wb);
+        G.r = Math.max(LIM.r[0], Math.min(LIM.r[1], (cornerX - 10 - x) / S));
       }
       draw();
       e.preventDefault();

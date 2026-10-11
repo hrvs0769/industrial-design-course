@@ -632,3 +632,8 @@ h1, h2, h3, .sec-title, .hero-title, .end-title, .closing-big,
 .md-reads b{ font-family:var(--mono); font-size:19px; font-weight:600; font-variant-numeric:tabular-nums;
   text-align:right; letter-spacing:-.01em; }
 .md-reads em{ grid-column:2; font-style:normal; font-size:12px; color:var(--faint); text-align:right; }
+
+/* 内圆角是结构关键项，视觉上给一点权重 */
+.md-reads > div.is-key{ background:rgba(255,90,31,.055); }
+.md-reads > div.is-key span{ color:#FFB694; }
+.md-reads > div.is-key b{ color:var(--paper); }
