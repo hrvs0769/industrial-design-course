@@ -41,8 +41,9 @@
       wall: 1.6,   // 壁厚 mm
       draft: 1.0,  // 拔模角（度），负值 = 倒扣
       r: 1.2,      // 底角半径 mm
-      bottom: 2.4  // 底厚 mm
+      bottom: 2.2  // 底厚（会随壁厚联动，见 geom）
     };
+    const G0 = Object.assign({}, G);          // 初始形状，「重来」要回到这里
     const GOOD = { wall: [1.2, 3.0], draft: [1.0, 6], r: [0.8, 6], rI: 0.8 };
     const LIM  = { wall: [0.6, 4.0], draft: [-3, 6],  r: [0, 6] };
 
@@ -55,7 +56,9 @@
       const Wt  = G.Wb + tan * H;                  // 顶部外侧半宽
       const Wi  = G.Wb - G.wall;                   // 底部内侧半宽
       const Wti = Wt - G.wall;                     // 顶部内侧半宽
-      const bt  = Math.min(G.bottom, H * .6);
+      // 底厚随壁厚联动（真实零件底比壁厚）：这样厚壁也能留出足够的内圆角，
+      // 否则「壁厚 > 2.8mm」会变成一整片不可能成功的参数区。
+      const bt  = Math.min(Math.max(G.wall * 1.4, 1.6), H * .45);
       // 外圆角：受几何限制但不再"偷偷截断"（读数必须等于实际画出来的）
       const rO  = Math.max(0, Math.min(G.r, G.Wb * .55, bt * 1.5, H * .34));
       // 内圆角：等壁厚的必然结果 —— 内圆角 = 外圆角 − 壁厚。
@@ -248,10 +251,16 @@
       const rEl = $('[data-read="r"]', root);
       if (rEl) rEl.textContent = g3.rO.toFixed(1) + ' mm';
       const riEl = $('[data-read="ri"]', root);
-      if (riEl) {
-        riEl.textContent = g3.rI.toFixed(1) + ' mm';
-        riEl.style.color = g3.rI < GOOD.rI ? 'var(--hot)' : '';
-      }
+      if (riEl) riEl.textContent = g3.rI.toFixed(1) + ' mm';
+      // 实时标注：哪个参数已经越出工艺常规区间。不给答案，只给准星 ——
+      // 原来学生只能"按顶出 → 被拒 → 再猜"，像在盲盒里摸。
+      const mark = (k, ok) => {
+        const el = $('[data-read="' + k + '"]', root);
+        if (el) el.classList.toggle('is-warn', !ok);
+      };
+      mark('wall', G.wall >= GOOD.wall[0] && G.wall <= GOOD.wall[1]);
+      mark('draft', G.draft >= GOOD.draft[0]);
+      mark('r', g3.rI >= GOOD.rI);
 
       // 参数条
       $$('[data-range]', root).forEach(el => {
@@ -313,32 +322,31 @@
       return ((evt.clientX - r.left) / r.width) * W;
     }
     let drag = null;
+    // 增益：光标移动 1px 对应参数的多少。原来 1:1 时，
+    // 合格区在 560px 画布上只有 11px 宽 —— 学生根本拖不中。
+    const GAIN = { draft: 5, wall: 8, r: 5 };
 
     root.addEventListener('pointerdown', e => {
       const h = e.target.closest('.md-handle');
       if (!h || phase !== 'idle') return;
-      drag = h.dataset.h;
+      drag = { k: h.dataset.h, x0: toMm(e), G0: Object.assign({}, G) };
       h.style.cursor = 'grabbing';
       try { root.setPointerCapture && root.setPointerCapture(e.pointerId); } catch (err) {}
       e.preventDefault();
     });
     root.addEventListener('pointermove', e => {
       if (!drag) return;
-      const x = toMm(e);
-      if (drag === 'draft') {
-        const want = (x - CX) / S;                       // 顶部外侧半宽 mm
-        const deg = Math.atan2(want - G.Wb, H) * 180 / Math.PI;
-        G.draft = Math.max(LIM.draft[0], Math.min(LIM.draft[1], deg));
-      } else if (drag === 'wall') {
-        // 手柄在内壁的腰部：先算出该高度的外壁位置，再反推壁厚
-        const tan = Math.tan(G.draft * Math.PI / 180);
-        const outerMid = G.Wb + tan * H * 0.5;
-        G.wall = Math.max(LIM.wall[0], Math.min(LIM.wall[1], outerMid - (x - CX) / S));
-      } else if (drag === 'r') {
-        // 手柄画在 (外底角x − r·S − 10, 底边)。逆运算必须严格对称，
-        // 否则拖到某个位置不等于某个值（上一版的增量式就有这个毛病）。
-        const cornerX = CX + px(G.Wb);
-        G.r = Math.max(LIM.r[0], Math.min(LIM.r[1], (cornerX - 10 - x) / S));
+      const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+      const dmm = (toMm(e) - drag.x0) / (S * GAIN[drag.k]);   // 拖拽量 → 毫米当量
+      const g0 = drag.G0;
+      if (drag.k === 'draft') {
+        const Wt0 = g0.Wb + Math.tan(g0.draft * Math.PI / 180) * H;
+        const deg = Math.atan2((Wt0 + dmm) - G.Wb, H) * 180 / Math.PI;
+        G.draft = cl(deg, LIM.draft[0], LIM.draft[1]);
+      } else if (drag.k === 'wall') {
+        G.wall = cl(g0.wall - dmm, LIM.wall[0], LIM.wall[1]);
+      } else if (drag.k === 'r') {
+        G.r = cl(g0.r - dmm, LIM.r[0], LIM.r[1]);
       }
       draw();
       e.preventDefault();
@@ -404,6 +412,7 @@
     // 复位
     const rst = $('[data-moldreset]', root);
     if (rst) rst.addEventListener('click', () => {
+      Object.assign(G, G0);                   // 形状也要回到初始 —— 原来只重置了动画
       phase = 'idle'; ejectY = 0; heat = null; jammed = false;
       const st = $('[data-stage]', root); if (st) st.textContent = '';
       draw();

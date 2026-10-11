@@ -637,3 +637,7 @@ h1, h2, h3, .sec-title, .hero-title, .end-title, .closing-big,
 .md-reads > div.is-key{ background:rgba(255,90,31,.055); }
 .md-reads > div.is-key span{ color:#FFB694; }
 .md-reads > div.is-key b{ color:var(--paper); }
+
+/* 读数越出工艺区间时的提示（不给答案，只给准星） */
+.md-reads b.is-warn{ color:#F5B841; }
+.md-reads b.is-warn::after{ content:" ！"; font-size:14px; }
