@@ -2,3 +2,10 @@
 Thumbs.db
 *.log
 node_modules/
+# 业务文件不要进这个仓库
+要出海CRM/
+*.xlsx
+*.xls
+*.csv
+*.docx
+*.pdf
