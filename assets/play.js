@@ -171,11 +171,10 @@
         `Q${p2(bR, YB)} ${p2(bR, YB - rp)}`,
         `L${p2(oR, yTop)}`,
         `L${p2(iR, yTop)}`,                                   // 顶部端面
-        `L${p2(CX + px(g.Wti), yTop - 0)}`,
-        `L${p2(cR, yIn + rb)}`,
+        `L${p2(cR, yIn - rb)}`,
         `Q${p2(cR, yIn)} ${p2(cR - rb, yIn)}`,
         `L${p2(cL + rb, yIn)}`,
-        `Q${p2(cL, yIn)} ${p2(cL, yIn + rb)}`,
+        `Q${p2(cL, yIn)} ${p2(cL, yIn - rb)}`,
         `L${p2(iL, yTop)}`,
         `L${p2(oL, yTop)}`,
         `L${p2(bL, YB - rp)}`,
