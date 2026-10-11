@@ -91,7 +91,9 @@ body::before{
 .topbar.is-light kbd{ border-color:var(--wall-line); background:rgba(20,19,14,.05); color:var(--wall-ink); }
 
 .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--paper); font-weight:650; font-size:13.5px; letter-spacing:.06em; }
-.brand-mark{ width:16px; height:16px; border-radius:5px; background:var(--hot); box-shadow:0 0 0 4px rgba(255,90,31,.16); flex:0 0 auto; }
+.brand-mark{ width:19px; height:19px; flex:0 0 auto; display:block; }
+.brand:hover .brand-mark{ transform:rotate(-8deg) scale(1.06); }
+.brand-mark{ transition:transform .5s var(--e-apple, cubic-bezier(.32,.72,0,1)); }
 .brand-text em{ color:var(--hot); font-style:normal; margin:0 3px; }
 
 .dots{ display:flex; gap:7px; align-items:center; }

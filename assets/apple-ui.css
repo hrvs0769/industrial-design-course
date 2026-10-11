@@ -641,3 +641,10 @@ h1, h2, h3, .sec-title, .hero-title, .end-title, .closing-big,
 /* 读数越出工艺区间时的提示（不给答案，只给准星） */
 .md-reads b.is-warn{ color:#F5B841; }
 .md-reads b.is-warn::after{ content:" ！"; font-size:14px; }
+
+/* Logo 在浅色顶栏上把「断面」换成墙色，否则会糊在一起 */
+.topbar.is-light{ --mark-cut:#F1EDE4; }
+
+/* 成本实验室：结果面板（放在右栏，与左侧控件并排） */
+.cost-side{ display:flex; flex-direction:column; }
+.sim-grid .cost-side{ padding-top:4px; }

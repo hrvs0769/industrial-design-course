@@ -53,6 +53,36 @@
     }).join('');
   }
 
+  /* ── 首屏主按钮：按进度决定指向 ───────────────────────
+     网站的本体是 16 课。首屏最强的按钮应该通向「你该去的那一课」，
+     而不是某个局部实验 —— 后者是作者的展示欲，不是用户的需要。      */
+  const heroStart = document.getElementById('heroStart');
+  if (heroStart && PROG) {
+    const total = COURSE.lessons.length || 16;
+    const firstUndone = COURSE.lessons.find(l => !done[l.id]);
+    if (!firstUndone) {
+      // 全部读完
+      heroStart.href = 'lessons/' + COURSE.lessons[0].file;
+      heroStart.textContent = '再看一遍第 1 课 →';
+    } else if (firstUndone.id === '01' || +firstUndone.id === 1) {
+      heroStart.href = 'lessons/' + firstUndone.file;
+      heroStart.textContent = '从第 1 课开始 →';
+    } else {
+      heroStart.href = 'lessons/' + firstUndone.file;
+      heroStart.textContent = `继续第 ${firstUndone.id} 课 →`;
+    }
+    // 首屏元信息也带上进度
+    if (PROG.count() > 0) {
+      const meta = document.querySelector('.hero-meta');
+      if (meta) {
+        const sp = document.createElement('span');
+        sp.className = 'hero-prog';
+        sp.innerHTML = `<span class="sep"></span><b>${PROG.count()}</b> / ${total} 已完成`;
+        meta.appendChild(sp);
+      }
+    }
+  }
+
   /* ── 进度条 ─────────────────────────────────────────── */
   const progWrap = $('#progWrap');
   if (progWrap && PROG) {

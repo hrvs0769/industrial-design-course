@@ -403,6 +403,20 @@ ${SHOT(b)}
     const stage = kind === 'ergo'
       ? `<div class="sim-stage"><span class="stage-label">BODY FIT</span>
            <div data-figure></div></div>`
+      : kind === 'cost'
+      ? `<div class="cost-side">
+           <div class="cl-bars">
+             <div class="cl-row" data-bar="材料"><span class="cl-name">材料</span>
+               <span class="cl-track"><i></i></span><span class="cl-val">¥0</span></div>
+             <div class="cl-row" data-bar="工时"><span class="cl-name">装配工时</span>
+               <span class="cl-track"><i></i></span><span class="cl-val">¥0</span></div>
+             <div class="cl-row" data-bar="模具分摊"><span class="cl-name">模具分摊</span>
+               <span class="cl-track"><i></i></span><span class="cl-val">¥0</span></div>
+           </div>
+           <div class="cl-total"><span style="color:var(--muted);font-size:13px">单件成本</span>
+             <b data-total>¥0</b></div>
+           <div class="cl-tip is-ok" data-tip></div>
+         </div>`
       : `<div class="sim-stage"><span class="stage-label">MOLD SIM</span>
            <span class="stage-state" data-stage></span><div data-part></div></div>`;
 
@@ -430,6 +444,22 @@ ${SHOT(b)}
                     <span class="pl-flag" data-flag="drag">拉伤</span>
                     <span class="pl-flag" data-flag="crack">应力开裂</span>
                   </div>`;
+    }
+    if (kind === 'cost') {
+      controls = `
+        <div class="sim-ctl"><div class="sim-ctl-top"><label>产量</label><b data-qty>10 万件</b></div>
+          <div class="sim-range"><input type="range" data-k2="qty" min="3" max="6.3" step="0.05" value="5" aria-label="产量"></div>
+          <div class="sim-scale"><span>1 千</span><span>产量越大，模具费摊得越薄</span><span>200 万</span></div></div>
+        <div class="sim-ctl"><div class="sim-ctl-top"><label>零件数</label><b data-parts>6 个</b></div>
+          <div class="sim-range"><input type="range" data-k2="parts" min="1" max="24" step="1" value="6" aria-label="零件数"></div>
+          <div class="sim-scale"><span>1</span><span>每多一个零件，多一道工位</span><span>24</span></div></div>
+        <div class="sim-ctl"><div class="sim-ctl-top"><label>材料</label><b data-mat>ABS 塑料</b></div>
+          <div class="cl-mats">
+            <button class="cl-mat is-on" data-matbtn="abs" type="button">ABS</button>
+            <button class="cl-mat" data-matbtn="pp" type="button">PP</button>
+            <button class="cl-mat" data-matbtn="al" type="button">铝合金</button>
+            <button class="cl-mat" data-matbtn="steel" type="button">不锈钢</button>
+          </div></div>`;
     }
     const readouts = kind === 'ergo'
       ? `<div class="ergo-read">

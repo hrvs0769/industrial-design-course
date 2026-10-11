@@ -47,7 +47,7 @@
   if (topbar) {
     topbar.innerHTML = `
       <a class="brand" href="${B}index.html">
-        <span class="brand-mark" aria-hidden="true"></span>
+        <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M28 9h44a19 19 0 0 1 19 19v25L53 91H28A19 19 0 0 1 9 72V28A19 19 0 0 1 28 9z" fill="#FF5A1F"/><path d="M66 28h6a19 19 0 0 1 19 19v6L53 91H28A19 19 0 0 1 9 72V66z" fill="var(--mark-cut,#F4F1EA)"/></svg>
         <span class="brand-text">工业设计<em>·</em>第 ${esc(lesson.id)} 课</span>
       </a>
       <nav class="dots" id="dots" aria-label="本章导航"></nav>

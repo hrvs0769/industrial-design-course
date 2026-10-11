@@ -7,7 +7,7 @@
 <meta name="description" content="大学工业设计专业导论课。一学期十六课，从一件真实的实物开始，每一课都落到学生自己动手。" />
 <link rel="stylesheet" href="assets/style.css" />
 <link rel="stylesheet" href="assets/apple-ui.css" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0b0c'/><circle cx='50' cy='42' r='26' fill='none' stroke='%23ff5a1f' stroke-width='9'/><path d='M26 78h48' stroke='%23f4f1ea' stroke-width='9' stroke-linecap='round'/></svg>" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22%3E%3Cpath%20d=%22M28%209h44a19%2019%200%200%201%2019%2019v25L53%2091H28A19%2019%200%200%201%209%2072V28A19%2019%200%200%201%2028%209z%22%20fill=%22%23FF5A1F%22/%3E%3Cpath%20d=%22M66%2028h6a19%2019%200%200%201%2019%2019v6L53%2091H28A19%2019%200%200%201%209%2072V66z%22%20fill=%22%23F4F1EA%22/%3E%3C/svg%3E" />
 </head>
 <body class="course-home">
 
@@ -16,7 +16,7 @@
 
 <header class="topbar" id="topbar">
   <a class="brand" href="index.html">
-    <span class="brand-mark" aria-hidden="true"></span>
+    <svg class="brand-mark" viewBox="0 0 100 100" aria-hidden="true"><path d="M28 9h44a19 19 0 0 1 19 19v25L53 91H28A19 19 0 0 1 9 72V28A19 19 0 0 1 28 9z" fill="#FF5A1F"/><path d="M66 28h6a19 19 0 0 1 19 19v6L53 91H28A19 19 0 0 1 9 72V66z" fill="var(--mark-cut,#F4F1EA)"/></svg>
     <span class="brand-text">工业设计<em>·</em>课程地图</span>
   </a>
   <div class="topbar-right">
@@ -42,8 +42,8 @@
         十六周之后，你未必会画图，<br>但你再也无法随便看待一件东西。
       </p>
       <div class="hero-cta reveal" data-d="4">
-        <a class="btn btn--primary" href="#lab">先玩一个 →</a>
-        <a class="btn btn--ghost" href="#map">看完整课程地图</a>
+        <a class="btn btn--primary" id="heroStart" href="lessons/01-what-is-id.html">从第 1 课开始 →</a>
+        <a class="btn btn--ghost" href="#map">先看课程地图</a>
       </div>
       <div class="hero-meta reveal" data-d="5">
         <span><b>16</b> 课 · 一学期</span><span class="sep"></span>
@@ -54,14 +54,36 @@
     <div class="course-strip" id="courseStrip" aria-hidden="true"></div>
   </section>
 
-  <!-- ═══ 实验室 ①：注塑 ═══ -->
+  <!-- ═══ 课程地图 ═══ -->
+  <section class="sec" id="map" data-title="课程地图">
+    <div class="wrap">
+      <p class="kicker">课程地图</p>
+      <h2 class="sec-title">一学期，十六个问题。</h2>
+      <p class="lead narrow">
+        从"设计是什么"走到"你学会了问什么问题"。点任意一课开始 —— 上过的课会自动标出来。
+      </p>
+
+      <div class="prog-wrap reveal" id="progWrap" hidden>
+        <div class="prog-bar"><i id="progBar" style="width:0%"></i></div>
+        <div class="prog-meta">
+          <span id="progText">已完成 0 / 16</span>
+          <a class="btn btn--ghost btn--tiny" id="progGo" href="#">继续上次 →</a>
+          <button class="prog-reset" id="progReset" type="button">清空进度</button>
+        </div>
+      </div>
+
+      <div class="course-map" id="courseMap"></div>
+    </div>
+  </section>
+
+  <!-- ═══ 第 06 课的实验室（作为预告放在地图之后）═══ -->
   <section class="sec sec--dark" id="lab" data-title="开模实验室">
     <div class="wrap">
-      <p class="kicker reveal">先玩一个 · 不用赔钱</p>
-      <h2 class="sec-title reveal">你来开一次模。</h2>
+      <p class="kicker reveal">第 06 课的实验 · 可以先试</p>
+      <h2 class="sec-title reveal">这门课会让你亲手把东西做坏。</h2>
       <p class="lead narrow reveal">
-        下面是一副<em>真正会拒绝你</em>的模具。你不用调参数 —— 直接拖图上的三个白点，
-        改变零件的形状。然后按「顶出」，看它能不能从钢模里出来。
+        这是第 06 课《材料与工艺》里的一个实验。到那一课你会先弄懂模具、分型面和拔模角，
+        再动手。如果你现在就想看它是什么样子 —— 下面这副模具<em>真的会拒绝你</em>。
       </p>
 
       <div class="sim reveal" data-lab="molding">
@@ -103,102 +125,6 @@
             </div>
 
             <div class="pl-verdict is-idle" data-verdict></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══ 课程地图 ═══ -->
-  <section class="sec" id="map" data-title="课程地图">
-    <div class="wrap">
-      <p class="kicker">课程地图</p>
-      <h2 class="sec-title">一学期，十六个问题。</h2>
-      <p class="lead narrow">
-        从"设计是什么"走到"你学会了问什么问题"。点任意一课开始 —— 上过的课会自动标出来。
-      </p>
-
-      <div class="prog-wrap reveal" id="progWrap" hidden>
-        <div class="prog-bar"><i id="progBar" style="width:0%"></i></div>
-        <div class="prog-meta">
-          <span id="progText">已完成 0 / 16</span>
-          <a class="btn btn--ghost btn--tiny" id="progGo" href="#">继续上次 →</a>
-          <button class="prog-reset" id="progReset" type="button">清空进度</button>
-        </div>
-      </div>
-
-      <div class="course-map" id="courseMap"></div>
-    </div>
-  </section>
-
-  <!-- ═══ 实验室 ②：成本 ═══ -->
-  <section class="sec sec--alt" id="cost" data-title="成本实验室">
-    <div class="wrap">
-      <p class="kicker reveal">再玩一个</p>
-      <h2 class="sec-title reveal">你的设计值多少钱？</h2>
-      <p class="lead narrow reveal">
-        同一张图纸，做一千件和做一百万件，单件成本可以差十八倍。拖一下产量，看模具费怎么被摊薄。
-      </p>
-
-      <div class="sim reveal" data-lab="cost">
-        <div class="sim-head">
-          <h3>成本实验室</h3>
-          <span class="sim-tag">第 07 课 · 结构与成本</span>
-        </div>
-        <p class="sim-sub">一件体积 320 cm³ 的产品。改产量、改零件数、换材料，看单件成本怎么变。</p>
-
-        <div class="sim-grid">
-          <div>
-            <div class="sim-ctl">
-              <div class="sim-ctl-top"><label>产量</label><b data-qty>10 万件</b></div>
-              <div class="sim-range">
-                <input type="range" data-k2="qty" min="3" max="6.3" step="0.05" value="5" aria-label="产量" />
-              </div>
-              <div class="sim-scale"><span>1 千</span><span>10 万</span><span>200 万</span></div>
-            </div>
-
-            <div class="sim-ctl">
-              <div class="sim-ctl-top"><label>零件数</label><b data-parts>6 个</b></div>
-              <div class="sim-range">
-                <input type="range" data-k2="parts" min="1" max="24" step="1" value="6" aria-label="零件数" />
-              </div>
-              <div class="sim-scale"><span>1</span><span>每多一个零件，多一道工位</span><span>24</span></div>
-            </div>
-
-            <div class="sim-ctl">
-              <div class="sim-ctl-top"><label>材料</label><b data-mat>ABS 塑料</b></div>
-              <div class="cl-mats">
-                <button class="cl-mat is-on" data-matbtn="abs" type="button">ABS</button>
-                <button class="cl-mat" data-matbtn="pp" type="button">PP</button>
-                <button class="cl-mat" data-matbtn="al" type="button">铝合金</button>
-                <button class="cl-mat" data-matbtn="steel" type="button">不锈钢</button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div class="cl-bars">
-              <div class="cl-row" data-bar="材料">
-                <span class="cl-name">材料</span>
-                <span class="cl-track"><i></i></span>
-                <span class="cl-val">¥0</span>
-              </div>
-              <div class="cl-row" data-bar="工时">
-                <span class="cl-name">装配工时</span>
-                <span class="cl-track"><i></i></span>
-                <span class="cl-val">¥0</span>
-              </div>
-              <div class="cl-row" data-bar="模具分摊">
-                <span class="cl-name">模具分摊</span>
-                <span class="cl-track"><i></i></span>
-                <span class="cl-val">¥0</span>
-              </div>
-            </div>
-            <div class="cl-total">
-              <span style="color:var(--muted);font-size:13px">单件成本</span>
-              <b data-total>¥0</b>
-            </div>
-            <div class="cl-tip is-ok" data-tip></div>
           </div>
         </div>
       </div>
